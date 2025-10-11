@@ -1,11 +1,12 @@
 from math import sqrt, atan2, sin, cos, pi, e
-#from logic import Person, Sources, Genes, Graph, Draw, set_parameters
+from people import Person
 from random import uniform, randint
 import pygame, inspect
 from sys import exit
 import pyautogui, time
 import pygame.freetype, cProfile, pstats
 from line_profiler import LineProfiler
+from main import world_y_size
 
 clock = pygame.time.Clock()
 
@@ -22,13 +23,7 @@ camera_x = screen_x/2
 camera_y = screen_y/2
 zoom = 1
 
-class Person:
-    def __init__(self,
-                 x,
-                 y):
-        self.x = x
-        self.y = y
-people = [Person(x = randint(0,world_x_size),
+people = [Person(x = randint(0,world_x_size)
                  y = randint(0,world_y_size))
                  for i in range(300)]
 
@@ -69,6 +64,6 @@ for i in range(500000):
         pygame.draw.circle(screen, (255,255,255), (person_x, person_y), person_size*zoom)
 
     border_rect = pygame.Rect(((-camera_x * zoom) + screen_x/2),((-camera_y * zoom) + screen_y/2),round(world_x_size*zoom),round(world_y_size*zoom))
-    pygame.draw.rect(screen, (255,255,255), border_rect, round(1*zoom))
+    pygame.draw.rect(screen, (255,255,255), border_rect, round(5*zoom))
     pygame.display.update()
     clock.tick()
