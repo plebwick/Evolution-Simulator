@@ -1,50 +1,11 @@
 [
     {
-        "label": "sqrt",
-        "importPath": "math",
-        "description": "math",
+        "label": "pygame",
+        "kind": 6,
         "isExtraImport": true,
-        "detail": "math",
-        "documentation": {}
-    },
-    {
-        "label": "atan2",
-        "importPath": "math",
-        "description": "math",
-        "isExtraImport": true,
-        "detail": "math",
-        "documentation": {}
-    },
-    {
-        "label": "sin",
-        "importPath": "math",
-        "description": "math",
-        "isExtraImport": true,
-        "detail": "math",
-        "documentation": {}
-    },
-    {
-        "label": "cos",
-        "importPath": "math",
-        "description": "math",
-        "isExtraImport": true,
-        "detail": "math",
-        "documentation": {}
-    },
-    {
-        "label": "pi",
-        "importPath": "math",
-        "description": "math",
-        "isExtraImport": true,
-        "detail": "math",
-        "documentation": {}
-    },
-    {
-        "label": "e",
-        "importPath": "math",
-        "description": "math",
-        "isExtraImport": true,
-        "detail": "math",
+        "importPath": "pygame",
+        "description": "pygame",
+        "detail": "pygame",
         "documentation": {}
     },
     {
@@ -53,6 +14,22 @@
         "description": "people",
         "isExtraImport": true,
         "detail": "people",
+        "documentation": {}
+    },
+    {
+        "label": "Genes",
+        "importPath": "people",
+        "description": "people",
+        "isExtraImport": true,
+        "detail": "people",
+        "documentation": {}
+    },
+    {
+        "label": "Simulation",
+        "importPath": "simulation",
+        "description": "simulation",
+        "isExtraImport": true,
+        "detail": "simulation",
         "documentation": {}
     },
     {
@@ -72,54 +49,19 @@
         "documentation": {}
     },
     {
-        "label": "pygame,",
-        "kind": 6,
+        "label": "pi",
+        "importPath": "math",
+        "description": "math",
         "isExtraImport": true,
-        "importPath": "pygame.",
-        "description": "pygame.",
-        "detail": "pygame.",
+        "detail": "math",
         "documentation": {}
     },
     {
-        "label": "exit",
-        "importPath": "sys",
-        "description": "sys",
+        "label": "time",
+        "importPath": "time",
+        "description": "time",
         "isExtraImport": true,
-        "detail": "sys",
-        "documentation": {}
-    },
-    {
-        "label": "pyautogui,",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "pyautogui.",
-        "description": "pyautogui.",
-        "detail": "pyautogui.",
-        "documentation": {}
-    },
-    {
-        "label": "pygame.freetype,",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "pygame.freetype.",
-        "description": "pygame.freetype.",
-        "detail": "pygame.freetype.",
-        "documentation": {}
-    },
-    {
-        "label": "LineProfiler",
-        "importPath": "line_profiler",
-        "description": "line_profiler",
-        "isExtraImport": true,
-        "detail": "line_profiler",
-        "documentation": {}
-    },
-    {
-        "label": "world_y_size",
-        "importPath": "main",
-        "description": "main",
-        "isExtraImport": true,
-        "detail": "main",
+        "detail": "time",
         "documentation": {}
     },
     {
@@ -127,43 +69,16 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "clock = pygame.time.Clock()\nscreen_x = 2560\nscreen_y = 1440\nworld_x_size = 2560\nworld_y_size = 1440\npygame.init()\nscreen = pygame.display.set_mode((screen_x,screen_y))\npygame.display.set_caption(\"main\")\ncamera_x = screen_x/2\ncamera_y = screen_y/2",
+        "peekOfCode": "clock = pygame.time.Clock()\npygame.init()\nsim = Simulation()\nscreen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\npeople = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(",
         "detail": "main",
         "documentation": {}
     },
     {
-        "label": "screen_x",
+        "label": "sim",
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "screen_x = 2560\nscreen_y = 1440\nworld_x_size = 2560\nworld_y_size = 1440\npygame.init()\nscreen = pygame.display.set_mode((screen_x,screen_y))\npygame.display.set_caption(\"main\")\ncamera_x = screen_x/2\ncamera_y = screen_y/2\nzoom = 1",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "screen_y",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "screen_y = 1440\nworld_x_size = 2560\nworld_y_size = 1440\npygame.init()\nscreen = pygame.display.set_mode((screen_x,screen_y))\npygame.display.set_caption(\"main\")\ncamera_x = screen_x/2\ncamera_y = screen_y/2\nzoom = 1\npeople = [Person(x = randint(0,world_x_size)",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "world_x_size",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "world_x_size = 2560\nworld_y_size = 1440\npygame.init()\nscreen = pygame.display.set_mode((screen_x,screen_y))\npygame.display.set_caption(\"main\")\ncamera_x = screen_x/2\ncamera_y = screen_y/2\nzoom = 1\npeople = [Person(x = randint(0,world_x_size)\n                 y = randint(0,world_y_size))",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "world_y_size",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "world_y_size = 1440\npygame.init()\nscreen = pygame.display.set_mode((screen_x,screen_y))\npygame.display.set_caption(\"main\")\ncamera_x = screen_x/2\ncamera_y = screen_y/2\nzoom = 1\npeople = [Person(x = randint(0,world_x_size)\n                 y = randint(0,world_y_size))\n                 for i in range(300)]",
+        "peekOfCode": "sim = Simulation()\nscreen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\npeople = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(0,100),\n                     uniform(0,100),",
         "detail": "main",
         "documentation": {}
     },
@@ -172,34 +87,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "screen = pygame.display.set_mode((screen_x,screen_y))\npygame.display.set_caption(\"main\")\ncamera_x = screen_x/2\ncamera_y = screen_y/2\nzoom = 1\npeople = [Person(x = randint(0,world_x_size)\n                 y = randint(0,world_y_size))\n                 for i in range(300)]\nfor i in range(500000):\n    for event in pygame.event.get():",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "camera_x",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "camera_x = screen_x/2\ncamera_y = screen_y/2\nzoom = 1\npeople = [Person(x = randint(0,world_x_size)\n                 y = randint(0,world_y_size))\n                 for i in range(300)]\nfor i in range(500000):\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "camera_y",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "camera_y = screen_y/2\nzoom = 1\npeople = [Person(x = randint(0,world_x_size)\n                 y = randint(0,world_y_size))\n                 for i in range(300)]\nfor i in range(500000):\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "zoom",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "zoom = 1\npeople = [Person(x = randint(0,world_x_size)\n                 y = randint(0,world_y_size))\n                 for i in range(300)]\nfor i in range(500000):\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()\n    keys = pygame.key.get_pressed()",
+        "peekOfCode": "screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\npeople = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(0,100),\n                     uniform(0,100),\n                     uniform(0,100),",
         "detail": "main",
         "documentation": {}
     },
@@ -208,7 +96,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "people = [Person(x = randint(0,world_x_size)\n                 y = randint(0,world_y_size))\n                 for i in range(300)]\nfor i in range(500000):\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()\n    keys = pygame.key.get_pressed()\n    move_speed = 5/zoom",
+        "peekOfCode": "people = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(0,100),\n                     uniform(0,100),\n                     uniform(0,100),\n                     uniform(0,100),\n                     uniform(0,100),",
         "detail": "main",
         "documentation": {}
     },
@@ -235,7 +123,7 @@
         "kind": 6,
         "importPath": "simulation",
         "description": "simulation",
-        "peekOfCode": "class Simulation:\n    def __init__(self):\n        self.people = []\n        self.sources = []\n        self.graphs = []\n        self.day = 0\n        self.year_length = 365\n        self.mutation_rate = 1",
+        "peekOfCode": "class Simulation:\n    def __init__(self):    \n        self.people = []\n        self.sources = []\n        self.graphs = []\n        self.screen_x = 2560\n        self.screen_y = 1440\n        self.world_x_size = 2560\n        self.world_y_size = 1440\n        self.camera_x = self.screen_x/2",
         "detail": "simulation",
         "documentation": {}
     }
