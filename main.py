@@ -23,6 +23,7 @@ sim.people = [Person(x = randint(0,sim.world_x_size),
                  genes = Genes(
                      uniform(2,8),
                      uniform(1,3),
+                     uniform(0.1,0.2),
                      uniform(0,100),
                      uniform(0,100),
                      uniform(0,100),
@@ -43,9 +44,11 @@ font1 = pygame.freetype.Font("font.otf", 24)
 
 previous_time = time()
 needed = 0
+previous_needed = 0
 ##############
 
 while True:
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -56,23 +59,28 @@ while True:
 
     sim.move_speed = 20/(sim.zoom)
 
-    if keys[pygame.K_UP]:
+    if keys[pygame.K_w]:
         sim.camera_y -= sim.move_speed
-    if keys[pygame.K_DOWN]:
+    if keys[pygame.K_s]:
         sim.camera_y += sim.move_speed
-    if keys[pygame.K_LEFT]:
+    if keys[pygame.K_a]:
         sim.camera_x -= sim.move_speed
-    if keys[pygame.K_RIGHT]:
+    if keys[pygame.K_d]:
         sim.camera_x += sim.move_speed
-    if keys[pygame.K_EQUALS]:
+    if keys[pygame.K_e]:
         sim.zoom *= (1 + sim.zoom_speed)
-    if keys[pygame.K_MINUS]:
+    if keys[pygame.K_q]:
         sim.zoom /= (1 + sim.zoom_speed)
     if keys[pygame.K_r]:
         sim.zoom = 1
         sim.camera_x = sim.screen_x / 2
         sim.camera_y = sim.screen_y / 2
-
+    if keys[pygame.K_LCTRL]:
+        sim.FPS /= (1 + sim.zoom_speed)
+    if keys[pygame.K_LSHIFT]:
+        sim.FPS *= (1 + sim.zoom_speed)
+    
+    sim.FPS = max(30, min(10000, sim.FPS))
     sim.zoom = max(0.1, min(100, sim.zoom))
     
     #Main simulation
@@ -82,14 +90,26 @@ while True:
     previous_time = current_time
 
     needed += frame_time
-    sim.FPS = 60
+    if needed > 0.5:
+        sim.FPS /= (1 + sim.zoom_speed)
+    previous_needed = needed
+
     while needed >= 1/sim.FPS:
         for person in sim.people:
-            person.move()
+            person.move(sim)
         needed -= 1/sim.FPS
-        pass
 
     screen.fill("blue")
+
+    #########temp
+
+    text_1, rect = font1.render(f"Speed: {sim.FPS}",  (0, 0, 0))
+    text_2, rect = font1.render(f"Zoom:  {sim.zoom}",  (0, 0, 0))
+
+    screen.blit(text_1, (50, 50))
+    screen.blit(text_2, (50, 100))
+    
+    ############
 
     for person in sim.people: 
         person_size = person.genes.size

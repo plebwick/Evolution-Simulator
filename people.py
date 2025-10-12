@@ -33,17 +33,35 @@ class Person:
 
         self.clock = clock
 
-    def move(self):
+    def move(self, sim):
         dx = cos(self.direction) * self.genes.speed
         dy = sin(self.direction) * self.genes.speed
 
-        self.direction += uniform(-0.1,0.1)
+        self.direction += uniform(-self.genes.agility,self.genes.agility)
         self.x += dx
         self.y += dy
+
+        if self.x > sim.world_x_size:
+            self.x = sim.world_x_size
+            self.direction *= -1
+            self.direction -= pi
+        if self.x < 0:
+            self.x = 0
+            self.direction *= -1
+            self.direction -= pi
+        if self.y > sim.world_y_size:
+            self.y = sim.world_y_size
+            self.direction *= -1
+        if self.y < 0:
+            self.y = 0
+            self.direction *= -1
+        
+
 class Genes:
     def __init__(self,
                  size,
                  speed,
+                 agility,
                  vision_range,
                  fertility,
                  virility,
@@ -51,6 +69,7 @@ class Genes:
                  gestation_period):
         self.size = size
         self.speed = speed
+        self.agility = agility
         self.vision_range = vision_range
         self.fertility = fertility
         self.virility = virility
