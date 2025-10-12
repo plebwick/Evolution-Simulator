@@ -6,16 +6,17 @@ from simulation import Simulation
 from random import uniform, randint
 from math import pi
 from time import time
-clock = pygame.time.Clock()
 
 pygame.init()
+
+clock = pygame.time.Clock()
 
 sim = Simulation()
 
 screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))
 pygame.display.set_caption("Evolution Simulation")
 
-people = [Person(x = randint(0,sim.world_x_size),
+sim.people = [Person(x = randint(0,sim.world_x_size),
                  y = randint(0,sim.world_y_size),
                  direction = uniform(0,2*pi),
                  target = None,
@@ -36,6 +37,13 @@ people = [Person(x = randint(0,sim.world_x_size),
                  clock = 0)
                  for i in range(300)]
 
+#######temp
+
+font1 = pygame.freetype.Font("font.otf", 24)
+
+
+##############
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -45,39 +53,43 @@ while True:
     #Key Presses
     keys = pygame.key.get_pressed()
 
-    move_speed = 5/zoom
-    zoom_speed = 0.005
+    sim.move_speed = 20/(sim.zoom)
 
     if keys[pygame.K_UP]:
-        camera_y -= move_speed
+        sim.camera_y -= sim.move_speed
     if keys[pygame.K_DOWN]:
-        camera_y += move_speed
+        sim.camera_y += sim.move_speed
     if keys[pygame.K_LEFT]:
-        camera_x -= move_speed
+        sim.camera_x -= sim.move_speed
     if keys[pygame.K_RIGHT]:
-        camera_x += move_speed
-    if keys[pygame.K_EQUALS] or keys[pygame.K_PLUS]:
-        zoom *= (1 + zoom_speed)
+        sim.camera_x += sim.move_speed
+    if keys[pygame.K_EQUALS]:
+        sim.zoom *= (1 + sim.zoom_speed)
     if keys[pygame.K_MINUS]:
-        zoom /= (1 + zoom_speed)
+        sim.zoom /= (1 + sim.zoom_speed)
     if keys[pygame.K_r]:
-        zoom = 1
-        camera_x = screen_x / 2
-        camera_y = screen_y / 2
+        sim.zoom = 1
+        sim.camera_x = sim.screen_x / 2
+        sim.camera_y = sim.screen_y / 2
 
+    sim.zoom = max(0.1, min(100, sim.zoom))
+    
     #Main simulation
-    time = time.time()
-    while time.time() - time < 1/FPS
+    timer = time()
+    while time() - timer < 1/sim.FPS:
+        for person in sim.people:
+            person.move()
+        pass
 
     screen.fill("blue")
 
-    for person in people: 
-        person_size = 2
-        person_x = ((person.x - camera_x) * zoom) + (sim.screen_x / 2)
-        person_y = ((person.y - camera_y) * zoom) + (sim.screen_y / 2)
-        pygame.draw.circle(screen, (255,255,255), (person_x, person_y), person_size*zoom)
+    for person in sim.people: 
+        person_size = 5
+        person_x = ((person.x - sim.camera_x) * sim.zoom) + (sim.screen_x / 2)
+        person_y = ((person.y - sim.camera_y) * sim.zoom) + (sim.screen_y / 2)
+        pygame.draw.circle(screen, (255,255,255), (person_x, person_y), max(1,person_size*sim.zoom))
 
-    border_rect = pygame.Rect(((-camera_x * zoom) + sim.screen_x/2),((-camera_y * zoom) + sim.screen_y/2),round(sim.world_x_size*zoom),round(sim.world_y_size*zoom))
-    pygame.draw.rect(screen, (255,255,255), border_rect, round(5*zoom))
+    border_rect = pygame.Rect(((-sim.camera_x * sim.zoom) + sim.screen_x/2),((-sim.camera_y * sim.zoom) + sim.screen_y/2),round(sim.world_x_size*sim.zoom),round(sim.world_y_size*sim.zoom))
+    pygame.draw.rect(screen, (255,255,255), border_rect, max(1,round(5*sim.zoom)))
     pygame.display.update()
     clock.tick()

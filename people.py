@@ -1,3 +1,6 @@
+from math import sin, cos, pi
+from random import uniform, randint
+
 class Person:
     def __init__(self,
                  x,
@@ -14,7 +17,7 @@ class Person:
                  clock):
         
         self.x,self.y = (x,y)
-        self.direciton = direction
+        self.direction = direction
         self.target = target
 
         self.genes = genes
@@ -30,6 +33,13 @@ class Person:
 
         self.clock = clock
 
+    def move(self):
+        dx = cos(self.direction) * self.genes.speed
+        dy = sin(self.direction) * self.genes.speed
+
+        self.direction += uniform(-2*pi,2*pi)
+        self.x += dx
+        self.y += dy
 class Genes:
     def __init__(self,
                  size,
