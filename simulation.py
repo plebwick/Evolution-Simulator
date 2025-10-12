@@ -1,3 +1,4 @@
+import pygame
 class Simulation:
     def __init__(self):    
         self.people = []
@@ -19,5 +20,24 @@ class Simulation:
         self.year_length = 365
         self.mutation_rate = 1
 
+    def update_simulation(self):
+        for person in self.people:
+            person.move(self)
+    
+    def draw_simulation(self, screen):
+
+        screen.fill("blue")
+
+        for person in self.people:
+            person.draw(self, screen)
+
+        for source in self.sources:
+            source.draw(self, screen)
+
+        border_rect = pygame.Rect(((-self.camera_x * self.zoom) + self.screen_x/2),((-self.camera_y * self.zoom) + self.screen_y/2),round(self.world_x_size*self.zoom),round(self.world_y_size*self.zoom))
+        pygame.draw.rect(screen, (255,255,255), border_rect, max(1,round(5*self.zoom)))
+
+    def draw_ui():
+        pass
     def create_people():
         pass

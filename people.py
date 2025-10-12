@@ -1,5 +1,6 @@
 from math import sin, cos, pi
 from random import uniform, randint
+import pygame
 
 class Person:
     def __init__(self,
@@ -32,6 +33,12 @@ class Person:
         self.current_activity = current_activity
 
         self.clock = clock
+
+    def draw(self, sim, screen):
+        person_size = self.genes.size
+        person_x = ((self.x - sim.camera_x) * sim.zoom) + (sim.screen_x / 2)
+        person_y = ((self.y - sim.camera_y) * sim.zoom) + (sim.screen_y / 2)
+        pygame.draw.circle(screen, (255,255,255), (person_x, person_y), max(1,person_size*sim.zoom))
 
     def move(self, sim):
         dx = cos(self.direction) * self.genes.speed

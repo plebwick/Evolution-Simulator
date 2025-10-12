@@ -145,7 +145,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "font1 = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0\nprevious_needed = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()",
+        "peekOfCode": "font1 = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0\nprevious_needed = 0\ngraph_screen = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()",
         "detail": "main",
         "documentation": {}
     },
@@ -154,7 +154,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "previous_time = time()\nneeded = 0\nprevious_needed = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()\n    #Key Presses",
+        "peekOfCode": "previous_time = time()\nneeded = 0\nprevious_needed = 0\ngraph_screen = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()",
         "detail": "main",
         "documentation": {}
     },
@@ -163,7 +163,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "needed = 0\nprevious_needed = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()\n    #Key Presses\n    keys = pygame.key.get_pressed()",
+        "peekOfCode": "needed = 0\nprevious_needed = 0\ngraph_screen = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()\n    #Key Presses",
         "detail": "main",
         "documentation": {}
     },
@@ -172,7 +172,16 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "previous_needed = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()\n    #Key Presses\n    keys = pygame.key.get_pressed()\n    sim.move_speed = 20/(sim.zoom)",
+        "peekOfCode": "previous_needed = 0\ngraph_screen = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()\n    #Key Presses\n    keys = pygame.key.get_pressed()",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "graph_screen",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "graph_screen = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()\n    #Key Presses\n    keys = pygame.key.get_pressed()\n    if graph_screen != True:",
         "detail": "main",
         "documentation": {}
     },
