@@ -37,7 +37,7 @@ class Person:
         dx = cos(self.direction) * self.genes.speed
         dy = sin(self.direction) * self.genes.speed
 
-        self.direction += uniform(-2*pi,2*pi)
+        self.direction += uniform(-0.1,0.1)
         self.x += dx
         self.y += dy
 class Genes:

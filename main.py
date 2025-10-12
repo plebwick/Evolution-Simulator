@@ -21,8 +21,8 @@ sim.people = [Person(x = randint(0,sim.world_x_size),
                  direction = uniform(0,2*pi),
                  target = None,
                  genes = Genes(
-                     uniform(0,100),
-                     uniform(0,100),
+                     uniform(2,8),
+                     uniform(1,3),
                      uniform(0,100),
                      uniform(0,100),
                      uniform(0,100),
@@ -41,7 +41,8 @@ sim.people = [Person(x = randint(0,sim.world_x_size),
 
 font1 = pygame.freetype.Font("font.otf", 24)
 
-
+previous_time = time()
+needed = 0
 ##############
 
 while True:
@@ -75,21 +76,29 @@ while True:
     sim.zoom = max(0.1, min(100, sim.zoom))
     
     #Main simulation
-    timer = time()
-    while time() - timer < 1/sim.FPS:
+
+    current_time = time()
+    frame_time = current_time - previous_time
+    previous_time = current_time
+
+    needed += frame_time
+    sim.FPS = 60
+    while needed >= 1/sim.FPS:
         for person in sim.people:
             person.move()
+        needed -= 1/sim.FPS
         pass
 
     screen.fill("blue")
 
     for person in sim.people: 
-        person_size = 5
+        person_size = person.genes.size
         person_x = ((person.x - sim.camera_x) * sim.zoom) + (sim.screen_x / 2)
         person_y = ((person.y - sim.camera_y) * sim.zoom) + (sim.screen_y / 2)
         pygame.draw.circle(screen, (255,255,255), (person_x, person_y), max(1,person_size*sim.zoom))
 
     border_rect = pygame.Rect(((-sim.camera_x * sim.zoom) + sim.screen_x/2),((-sim.camera_y * sim.zoom) + sim.screen_y/2),round(sim.world_x_size*sim.zoom),round(sim.world_y_size*sim.zoom))
     pygame.draw.rect(screen, (255,255,255), border_rect, max(1,round(5*sim.zoom)))
+
     pygame.display.update()
-    clock.tick()
+    clock.tick(60)

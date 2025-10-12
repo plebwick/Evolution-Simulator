@@ -109,7 +109,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "clock = pygame.time.Clock()\nsim = Simulation()\nscreen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.people = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(0,100),",
+        "peekOfCode": "clock = pygame.time.Clock()\nsim = Simulation()\nscreen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.people = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(2,8),",
         "detail": "main",
         "documentation": {}
     },
@@ -118,7 +118,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "sim = Simulation()\nscreen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.people = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(0,100),\n                     uniform(0,100),",
+        "peekOfCode": "sim = Simulation()\nscreen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.people = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(2,8),\n                     uniform(1,3),",
         "detail": "main",
         "documentation": {}
     },
@@ -127,7 +127,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.people = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(0,100),\n                     uniform(0,100),\n                     uniform(0,100),",
+        "peekOfCode": "screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.people = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(2,8),\n                     uniform(1,3),\n                     uniform(0,100),",
         "detail": "main",
         "documentation": {}
     },
@@ -136,7 +136,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "sim.people = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(0,100),\n                     uniform(0,100),\n                     uniform(0,100),\n                     uniform(0,100),\n                     uniform(0,100),",
+        "peekOfCode": "sim.people = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(2,8),\n                     uniform(1,3),\n                     uniform(0,100),\n                     uniform(0,100),\n                     uniform(0,100),",
         "detail": "main",
         "documentation": {}
     },
@@ -145,7 +145,25 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "font1 = pygame.freetype.Font(\"font.otf\", 24)\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()\n    #Key Presses\n    keys = pygame.key.get_pressed()\n    sim.move_speed = 20/(sim.zoom)",
+        "peekOfCode": "font1 = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()\n    #Key Presses",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "previous_time",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "previous_time = time()\nneeded = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()\n    #Key Presses\n    keys = pygame.key.get_pressed()",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "needed",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "needed = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()\n    #Key Presses\n    keys = pygame.key.get_pressed()\n    sim.move_speed = 20/(sim.zoom)",
         "detail": "main",
         "documentation": {}
     },
