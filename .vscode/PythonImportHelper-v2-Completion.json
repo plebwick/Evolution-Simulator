@@ -9,6 +9,14 @@
         "documentation": {}
     },
     {
+        "label": "Simulation",
+        "importPath": "simulation",
+        "description": "simulation",
+        "isExtraImport": true,
+        "detail": "simulation",
+        "documentation": {}
+    },
+    {
         "label": "Person",
         "importPath": "people",
         "description": "people",
@@ -25,11 +33,27 @@
         "documentation": {}
     },
     {
-        "label": "Simulation",
-        "importPath": "simulation",
-        "description": "simulation",
+        "label": "Person",
+        "importPath": "people",
+        "description": "people",
         "isExtraImport": true,
-        "detail": "simulation",
+        "detail": "people",
+        "documentation": {}
+    },
+    {
+        "label": "Source",
+        "importPath": "sources",
+        "description": "sources",
+        "isExtraImport": true,
+        "detail": "sources",
+        "documentation": {}
+    },
+    {
+        "label": "Source",
+        "importPath": "sources",
+        "description": "sources",
+        "isExtraImport": true,
+        "detail": "sources",
         "documentation": {}
     },
     {
@@ -58,6 +82,22 @@
     },
     {
         "label": "randint",
+        "importPath": "random",
+        "description": "random",
+        "isExtraImport": true,
+        "detail": "random",
+        "documentation": {}
+    },
+    {
+        "label": "randint",
+        "importPath": "random",
+        "description": "random",
+        "isExtraImport": true,
+        "detail": "random",
+        "documentation": {}
+    },
+    {
+        "label": "uniform",
         "importPath": "random",
         "description": "random",
         "isExtraImport": true,
@@ -141,6 +181,15 @@
         "documentation": {}
     },
     {
+        "label": "sim.sources",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "sim.sources = [Source(randint(0,sim.world_x_size),\n                      randint(0,sim.world_y_size),\n                      \"food\")\n                      for i in range(100)]\n#######temp\nfont1 = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0\nprevious_needed = 0\ngraph_screen = 0",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
         "label": "font1",
         "kind": 5,
         "importPath": "main",
@@ -210,6 +259,15 @@
         "description": "simulation",
         "peekOfCode": "class Simulation:\n    def __init__(self):    \n        self.people = []\n        self.sources = []\n        self.graphs = []\n        self.FPS = 60\n        self.screen_x = 2560\n        self.screen_y = 1440\n        self.world_x_size = 10240\n        self.world_y_size = 5760",
         "detail": "simulation",
+        "documentation": {}
+    },
+    {
+        "label": "Source",
+        "kind": 6,
+        "importPath": "sources",
+        "description": "sources",
+        "peekOfCode": "class Source:\n    def __init__(self,\n                 x,\n                 y,\n                 type):\n        self.x,self.y = (x,y)\n        self.type = type\n    def respawn(sim):\n        if len(sim.sources) < (sim.food_max + sim.water_max):\n            random_source = sim.sources[randint(0,len(sim.sources)-1)]",
+        "detail": "sources",
         "documentation": {}
     }
 ]

@@ -40,6 +40,10 @@ class Person:
         person_y = ((self.y - sim.camera_y) * sim.zoom) + (sim.screen_y / 2)
         pygame.draw.circle(screen, (255,255,255), (person_x, person_y), max(1,person_size*sim.zoom))
 
+    def death(self, sim):
+        if self.satiety <= 0 or self.hydrated <=0:
+            sim.people.remove(self)
+
     def move(self, sim):
         dx = cos(self.direction) * self.genes.speed
         dy = sin(self.direction) * self.genes.speed

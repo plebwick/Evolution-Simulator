@@ -1,4 +1,7 @@
 import pygame
+from sources import Source
+from people import Person
+
 class Simulation:
     def __init__(self):    
         self.people = []
@@ -20,13 +23,21 @@ class Simulation:
         self.year_length = 365
         self.mutation_rate = 1
 
+        self.food_max = 100
+        self.water_max = 100
+        self.food_water_chance = 0.5
+        self.source_respawn_chance = 1
+
     def update_simulation(self):
+        Source.respawn(self)
         for person in self.people:
+            person.clock += 1
+            person.death(self)
             person.move(self)
     
     def draw_simulation(self, screen):
 
-        screen.fill("blue")
+        screen.fill("#5473ff")
 
         for person in self.people:
             person.draw(self, screen)
@@ -38,6 +49,4 @@ class Simulation:
         pygame.draw.rect(screen, (255,255,255), border_rect, max(1,round(5*self.zoom)))
 
     def draw_ui():
-        pass
-    def create_people():
         pass

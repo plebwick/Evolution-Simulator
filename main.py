@@ -1,7 +1,8 @@
 import pygame
 
-from people import Person, Genes
 from simulation import Simulation
+from people import Person, Genes
+from sources import Source
 
 from random import uniform, randint
 from math import pi
@@ -38,6 +39,10 @@ sim.people = [Person(x = randint(0,sim.world_x_size),
                  clock = 0)
                  for i in range(300)]
 
+sim.sources = [Source(randint(0,sim.world_x_size),
+                      randint(0,sim.world_y_size),
+                      "food")
+                      for i in range(100)]
 #######temp
 
 font1 = pygame.freetype.Font("font.otf", 24)
@@ -103,7 +108,7 @@ while True:
             needed -= 1/sim.FPS
 
         sim.draw_simulation(screen)
-
+        sim.draw_ui
         #########temp
 
         text_1, rect = font1.render(f"Speed: {sim.FPS}",  (0, 0, 0))
