@@ -17,46 +17,6 @@
         "documentation": {}
     },
     {
-        "label": "Person",
-        "importPath": "people",
-        "description": "people",
-        "isExtraImport": true,
-        "detail": "people",
-        "documentation": {}
-    },
-    {
-        "label": "Genes",
-        "importPath": "people",
-        "description": "people",
-        "isExtraImport": true,
-        "detail": "people",
-        "documentation": {}
-    },
-    {
-        "label": "Person",
-        "importPath": "people",
-        "description": "people",
-        "isExtraImport": true,
-        "detail": "people",
-        "documentation": {}
-    },
-    {
-        "label": "Source",
-        "importPath": "sources",
-        "description": "sources",
-        "isExtraImport": true,
-        "detail": "sources",
-        "documentation": {}
-    },
-    {
-        "label": "Source",
-        "importPath": "sources",
-        "description": "sources",
-        "isExtraImport": true,
-        "detail": "sources",
-        "documentation": {}
-    },
-    {
         "label": "uniform",
         "importPath": "random",
         "description": "random",
@@ -82,6 +42,22 @@
     },
     {
         "label": "randint",
+        "importPath": "random",
+        "description": "random",
+        "isExtraImport": true,
+        "detail": "random",
+        "documentation": {}
+    },
+    {
+        "label": "randint",
+        "importPath": "random",
+        "description": "random",
+        "isExtraImport": true,
+        "detail": "random",
+        "documentation": {}
+    },
+    {
+        "label": "uniform",
         "importPath": "random",
         "description": "random",
         "isExtraImport": true,
@@ -137,6 +113,14 @@
         "documentation": {}
     },
     {
+        "label": "pi",
+        "importPath": "math",
+        "description": "math",
+        "isExtraImport": true,
+        "detail": "math",
+        "documentation": {}
+    },
+    {
         "label": "time",
         "importPath": "time",
         "description": "time",
@@ -145,11 +129,44 @@
         "documentation": {}
     },
     {
+        "label": "pygame,",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pygame.",
+        "description": "pygame.",
+        "detail": "pygame.",
+        "documentation": {}
+    },
+    {
+        "label": "Source",
+        "importPath": "sources",
+        "description": "sources",
+        "isExtraImport": true,
+        "detail": "sources",
+        "documentation": {}
+    },
+    {
+        "label": "Person",
+        "importPath": "people",
+        "description": "people",
+        "isExtraImport": true,
+        "detail": "people",
+        "documentation": {}
+    },
+    {
+        "label": "Genes",
+        "importPath": "people",
+        "description": "people",
+        "isExtraImport": true,
+        "detail": "people",
+        "documentation": {}
+    },
+    {
         "label": "clock",
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "clock = pygame.time.Clock()\nsim = Simulation()\nscreen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.people = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(2,8),",
+        "peekOfCode": "clock = pygame.time.Clock()\nsim = Simulation()\nscreen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.create_people()\nsim.create_sources()\n#######temp\nfont = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0",
         "detail": "main",
         "documentation": {}
     },
@@ -158,7 +175,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "sim = Simulation()\nscreen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.people = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(2,8),\n                     uniform(1,3),",
+        "peekOfCode": "sim = Simulation()\nscreen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.create_people()\nsim.create_sources()\n#######temp\nfont = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0\nprevious_needed = 0",
         "detail": "main",
         "documentation": {}
     },
@@ -167,34 +184,16 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.people = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(2,8),\n                     uniform(1,3),\n                     uniform(0.1,0.2),",
+        "peekOfCode": "screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.create_people()\nsim.create_sources()\n#######temp\nfont = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0\nprevious_needed = 0\ngraph_screen = 0",
         "detail": "main",
         "documentation": {}
     },
     {
-        "label": "sim.people",
+        "label": "font",
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "sim.people = [Person(x = randint(0,sim.world_x_size),\n                 y = randint(0,sim.world_y_size),\n                 direction = uniform(0,2*pi),\n                 target = None,\n                 genes = Genes(\n                     uniform(2,8),\n                     uniform(1,3),\n                     uniform(0.1,0.2),\n                     uniform(0,100),\n                     uniform(0,100),",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "sim.sources",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "sim.sources = [Source(randint(0,sim.world_x_size),\n                      randint(0,sim.world_y_size),\n                      \"food\")\n                      for i in range(100)]\n#######temp\nfont1 = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0\nprevious_needed = 0\ngraph_screen = 0",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "font1",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "font1 = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0\nprevious_needed = 0\ngraph_screen = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()",
+        "peekOfCode": "font = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0\nprevious_needed = 0\ngraph_screen = 0\n##############\nwhile True:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            pygame.quit()",
         "detail": "main",
         "documentation": {}
     },
@@ -248,7 +247,7 @@
         "kind": 6,
         "importPath": "people",
         "description": "people",
-        "peekOfCode": "class Genes:\n    def __init__(self,\n                 size,\n                 speed,\n                 agility,\n                 vision_range,\n                 fertility,\n                 virility,\n                 male_chance,\n                 gestation_period):",
+        "peekOfCode": "class Genes:\n    def __init__(self,\n                 size,\n                 speed,\n                 agility,\n                 vision_range,\n                 vision_angle,\n                 fertility,\n                 virility,\n                 male_chance,",
         "detail": "people",
         "documentation": {}
     },
@@ -266,7 +265,7 @@
         "kind": 6,
         "importPath": "sources",
         "description": "sources",
-        "peekOfCode": "class Source:\n    def __init__(self,\n                 x,\n                 y,\n                 type):\n        self.x,self.y = (x,y)\n        self.type = type\n    def respawn(sim):\n        if len(sim.sources) < (sim.food_max + sim.water_max):\n            random_source = sim.sources[randint(0,len(sim.sources)-1)]",
+        "peekOfCode": "class Source:\n    def __init__(self,\n                 x,\n                 y,\n                 type):\n        self.x,self.y = (x,y)\n        self.type = type\n    def respawn(sim):\n        if len(sim.sources) < (sim.food_max + sim.water_max):\n            if uniform(0,1) > 0.1:",
         "detail": "sources",
         "documentation": {}
     }

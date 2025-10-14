@@ -1,8 +1,6 @@
 import pygame
 
 from simulation import Simulation
-from people import Person, Genes
-from sources import Source
 
 from random import uniform, randint
 from math import pi
@@ -17,35 +15,12 @@ sim = Simulation()
 screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))
 pygame.display.set_caption("Evolution Simulation")
 
-sim.people = [Person(x = randint(0,sim.world_x_size),
-                 y = randint(0,sim.world_y_size),
-                 direction = uniform(0,2*pi),
-                 target = None,
-                 genes = Genes(
-                     uniform(2,8),
-                     uniform(1,3),
-                     uniform(0.1,0.2),
-                     uniform(0,100),
-                     uniform(0,100),
-                     uniform(0,100),
-                     uniform(0,100),
-                     uniform(0,100)),
-                 age = 0,
-                 postnatal_elapsed = None,
-                 gestation_period = None,
-                 satiety = 1000,
-                 hydrated = 1000,
-                 current_activity = None,
-                 clock = 0)
-                 for i in range(300)]
+sim.create_people()
+sim.create_sources()
 
-sim.sources = [Source(randint(0,sim.world_x_size),
-                      randint(0,sim.world_y_size),
-                      "food")
-                      for i in range(100)]
 #######temp
 
-font1 = pygame.freetype.Font("font.otf", 24)
+font = pygame.freetype.Font("font.otf", 24)
 
 previous_time = time()
 needed = 0
@@ -82,8 +57,8 @@ while True:
             sim.zoom /= (1 + sim.zoom_speed)
         if keys[pygame.K_r]:
             sim.zoom = 1
-            sim.camera_x = sim.screen_x / 2
-            sim.camera_y = sim.screen_y / 2
+            sim.camera_x = sim.world_x_size/2
+            sim.camera_y = sim.world_y_size/2
         if keys[pygame.K_LCTRL]:
             sim.FPS /= (1 + sim.zoom_speed)
         if keys[pygame.K_LSHIFT]:
@@ -108,14 +83,8 @@ while True:
             needed -= 1/sim.FPS
 
         sim.draw_simulation(screen)
-        sim.draw_ui
+        sim.draw_ui(screen, font)
         #########temp
-
-        text_1, rect = font1.render(f"Speed: {sim.FPS}",  (0, 0, 0))
-        text_2, rect = font1.render(f"Zoom:  {sim.zoom}",  (0, 0, 0))
-
-        screen.blit(text_1, (50, 50))
-        screen.blit(text_2, (50, 100))
         
         ############
 

@@ -14,11 +14,12 @@ class Person:
                  gestation_period,
                  satiety,
                  hydrated,
-                 current_activity,
-                 clock):
+                 current_activity
+                 ):
         
         self.x,self.y = (x,y)
         self.direction = direction
+        self.velocity = genes.speed
         self.target = target
 
         self.genes = genes
@@ -32,21 +33,40 @@ class Person:
 
         self.current_activity = current_activity
 
-        self.clock = clock
-
     def draw(self, sim, screen):
         person_size = self.genes.size
         person_x = ((self.x - sim.camera_x) * sim.zoom) + (sim.screen_x / 2)
         person_y = ((self.y - sim.camera_y) * sim.zoom) + (sim.screen_y / 2)
         pygame.draw.circle(screen, (255,255,255), (person_x, person_y), max(1,person_size*sim.zoom))
 
-    def death(self, sim):
-        if self.satiety <= 0 or self.hydrated <=0:
-            sim.people.remove(self)
+    def step(self, sim):
+        self.age += 1
 
-    def move(self, sim):
-        dx = cos(self.direction) * self.genes.speed
-        dy = sin(self.direction) * self.genes.speed
+        try:self.postnatal_elapsed += 1
+        except:pass
+
+        ##############temp
+        self.satiety -= 70 * (self.genes.size**0.65) * (self.genes.speed**0.25) * 1/365 * 1/6
+        ##################
+
+        if self.satiety <= 0 or self.hydrated <=0: sim.people.remove(self)
+        #elif uniform(0,1) < (0.2 + (0.00008*(self.age**2)))/29200: sim.people.remove(self)
+
+    def decide_current_action(self, sim):
+        if self.satiety > self.hydrated:
+            self.current_activity = "find_water"
+        else:
+            self.current_activity = "find_food"
+
+    def scan(self, sim):
+        pass
+    
+    def move_towards_target(self):
+        pass
+
+    def wander(self, sim):
+        dx = cos(self.direction) * self.velocity
+        dy = sin(self.direction) * self.velocity
 
         self.direction += uniform(-self.genes.agility,self.genes.agility)
         self.x += dx
@@ -66,7 +86,6 @@ class Person:
         if self.y < 0:
             self.y = 0
             self.direction *= -1
-        
 
 class Genes:
     def __init__(self,
@@ -74,6 +93,7 @@ class Genes:
                  speed,
                  agility,
                  vision_range,
+                 vision_angle,
                  fertility,
                  virility,
                  male_chance,
@@ -82,6 +102,7 @@ class Genes:
         self.speed = speed
         self.agility = agility
         self.vision_range = vision_range
+        self.vision_angle = vision_angle
         self.fertility = fertility
         self.virility = virility
         self.male_chance = male_chance
