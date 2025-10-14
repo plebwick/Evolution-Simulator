@@ -61,26 +61,34 @@ while True:
             sim.camera_y = sim.world_y_size/2
         if keys[pygame.K_LCTRL]:
             sim.FPS /= (1 + sim.zoom_speed)
+            sim.FPS = max(60, min(3000, sim.FPS))
         if keys[pygame.K_LSHIFT]:
             sim.FPS *= (1 + sim.zoom_speed)
+            sim.FPS = max(60, min(3000, sim.FPS))
+        if keys[pygame.K_SPACE]:
+            if sim.FPS == 0:
+                previous_time = time()
+                sim.FPS = previous_fps
+            else:
+                previous_fps = sim.FPS
+                sim.FPS = 0
         
-        sim.FPS = max(30, min(10000, sim.FPS))
-        sim.zoom = max(0.1, min(100, sim.zoom))
-        
+        sim.zoom = max(0.1, min(50, sim.zoom))
+
         #Main simulation
+        if sim.FPS is not 0:
+            current_time = time()
+            frame_time = current_time - previous_time
+            previous_time = current_time
 
-        current_time = time()
-        frame_time = current_time - previous_time
-        previous_time = current_time
-
-        needed += frame_time
-        if needed > 0.5:
-            sim.FPS /= (1 + sim.zoom_speed)
-        previous_needed = needed
-
-        while needed >= 1/sim.FPS:
-            sim.update_simulation()
-            needed -= 1/sim.FPS
+            needed += frame_time
+            if needed > 0.5:
+                sim.FPS /= (1 + sim.zoom_speed)
+            previous_needed = needed
+            
+            while needed >= 1/sim.FPS:
+                sim.update_simulation()
+                needed -= 1/sim.FPS
 
         sim.draw_simulation(screen)
         sim.draw_ui(screen, font)

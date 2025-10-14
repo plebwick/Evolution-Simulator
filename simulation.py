@@ -37,8 +37,8 @@ class Simulation:
                  direction = uniform(0,2*pi),
                  target = None,
                  genes = Genes(
-                     uniform(2,8),
-                     uniform(1,3),
+                     uniform(4,6),
+                     uniform(0.25,1),
                      uniform(0.1,0.2),
                      uniform(0,100),
                      uniform(0,100),
@@ -82,16 +82,18 @@ class Simulation:
         pygame.draw.rect(screen, (255,255,255), border_rect, max(1,round(5*self.zoom)))
 
     def draw_ui(self, screen, font):
-        text_1, rect = font.render(f"Speed: {self.FPS}",  (0, 0, 0))
+        text_1, rect = font.render(f"Speed: {self.FPS/60}",  (0, 0, 0))
         text_2, rect = font.render(f"Zoom:  {self.zoom}",  (0, 0, 0))
         mouse_pos = pyautogui.position()
         for person in self.people:
-            if abs(mouse_pos[0] - person.x) < 100 and abs(mouse_pos[1] - person.y) < 100:
+            person_x = ((person.x - self.camera_x) * self.zoom) + (self.screen_x / 2)
+            person_y = ((person.y - self.camera_y) * self.zoom) + (self.screen_y / 2)
+            if abs(mouse_pos[0] - person_x) < person.genes.size*self.zoom and abs(mouse_pos[1] - person_y) < person.genes.size*self.zoom:
                 stat, rect = font.render(f"Current activity: {person.current_activity}",  (0, 0, 0))
                 screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 10))
 
                 stat, rect = font.render(f"Direction: {person.direction}",  (0, 0, 0))
-                screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 10))
+                screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 30))
         
         screen.blit(text_1, (50, 50))
         screen.blit(text_2, (50, 100))
