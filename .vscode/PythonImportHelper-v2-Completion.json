@@ -137,6 +137,22 @@
         "documentation": {}
     },
     {
+        "label": "time",
+        "importPath": "time",
+        "description": "time",
+        "isExtraImport": true,
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "perf_counter",
+        "importPath": "time",
+        "description": "time",
+        "isExtraImport": true,
+        "detail": "time",
+        "documentation": {}
+    },
+    {
         "label": "pygame,",
         "kind": 6,
         "isExtraImport": true,
@@ -167,6 +183,14 @@
         "description": "people",
         "isExtraImport": true,
         "detail": "people",
+        "documentation": {}
+    },
+    {
+        "label": "defaultdict",
+        "importPath": "collections",
+        "description": "collections",
+        "isExtraImport": true,
+        "detail": "collections",
         "documentation": {}
     },
     {
@@ -264,7 +288,7 @@
         "kind": 6,
         "importPath": "simulation",
         "description": "simulation",
-        "peekOfCode": "class Simulation:\n    def __init__(self):    \n        self.people = []\n        self.sources = []\n        self.graphs = []\n        self.FPS = 500\n        self.screen_x = 2560\n        self.screen_y = 1440\n        self.world_x_size = 10240\n        self.world_y_size = 5760",
+        "peekOfCode": "class Simulation:\n    def __init__(self):    \n        self.people = []\n        self.sources = []\n        self.graphs = []\n        self.FPS = 500\n        self.screen_x = 2560\n        self.screen_y = 1440\n        self.world_x_size = 2560*4\n        self.world_y_size = 1440*4",
         "detail": "simulation",
         "documentation": {}
     },

@@ -59,6 +59,19 @@ class Person:
             self.current_activity = "find_food"
 
     def scan(self, sim):
+        sources = sim.check_grid(self.x, self.y)
+        if sources:
+            min_distance = float("inf")
+            possible_sources = [source for source in sources if source.type not in self.current_activity]
+            for source in possible_sources:
+                dx = self.x - source.x
+                dy = self.y - source.y
+                distance = dx**2 + dy**2
+                #if distance < self.genes.vision_range:
+                if distance < min_distance:
+                        min_distance = distance
+                        self.target = source
+        """
         if self.age % 60 == 0:
             min_distance = float("inf")
             possible_sources = [source for source in sim.sources if source.type not in self.current_activity]
@@ -69,7 +82,7 @@ class Person:
                 if distance < min_distance:
                     min_distance = distance
                     self.target = source
-    
+        """
     def move_towards_target(self):
         pass
 

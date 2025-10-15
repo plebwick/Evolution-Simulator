@@ -76,7 +76,7 @@ while True:
         sim.zoom = max(0.1, min(50, sim.zoom))
 
         #Main simulation
-        if sim.FPS is not 0:
+        if sim.FPS:
             current_time = time()
             frame_time = current_time - previous_time
             previous_time = current_time
