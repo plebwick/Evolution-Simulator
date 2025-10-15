@@ -11,7 +11,7 @@ class Simulation:
         self.sources = []
         self.graphs = []
 
-        self.FPS = 60
+        self.FPS = 500
         self.screen_x = 2560
         self.screen_y = 1440
         self.world_x_size = 10240
@@ -22,16 +22,19 @@ class Simulation:
         self.move_speed = 20/(self.zoom)
         self.zoom_speed = 0.05
 
+        self.grid = []
+        self.grid_size = 200
+
         self.day = 0
         self.year_length = 365
         self.mutation_rate = 1
 
-        self.starting_population = 500
+        self.starting_population = 600
 
-        self.food_max = 500
-        self.water_max = 500
+        total = 600
+        self.food_max = total/2
+        self.water_max = total/2
         self.food_water_chance = 0.5
-        self.source_respawn_chance = 1
 
     def create_people(self):
         self.people = [Person(x = randint(0,self.world_x_size),
@@ -48,7 +51,7 @@ class Simulation:
                      uniform(0,100),
                      uniform(0,100),
                      uniform(0,100)),
-                 age = 0,
+                 age = randint(0,100),
                  postnatal_elapsed = None,
                  gestation_period = None,
                  satiety = 1000,
@@ -61,7 +64,7 @@ class Simulation:
         self.sources = [Source(randint(0,self.world_x_size),
                       randint(0,self.world_y_size),
                       "food" if uniform(0,1) > self.food_water_chance else "water")
-                      for i in range(100)]
+                      for i in range(200)]
         
     def update_simulation(self):
         Source.respawn(self)
@@ -70,7 +73,14 @@ class Simulation:
             person.decide_current_action(self)
             person.scan(self)
             person.wander(self)
+        self.update_grid(self.sources + self.people)
     
+    def update_grid(self, objects):
+        self.grid.clear()
+        for object in objects:
+            location = (object.x // self.grid_size, object.y // self.grid_size)
+            self.grid[location].append[object]
+
     def draw_simulation(self, screen):
 
         screen.fill("#5473ff")

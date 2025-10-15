@@ -49,7 +49,7 @@ class Person:
         self.satiety -= 70 * (self.genes.size**0.65) * (self.genes.speed**0.25) * 1/365 * 1/6
         ##################
 
-        if self.satiety <= 0 or self.hydrated <=0: sim.people.remove(self)
+        #if self.satiety <= 0 or self.hydrated <=0: sim.people.remove(self)
         #elif uniform(0,1) < (0.2 + (0.00008*(self.age**2)))/29200: sim.people.remove(self)
 
     def decide_current_action(self, sim):
@@ -61,12 +61,13 @@ class Person:
     def scan(self, sim):
         if self.age % 60 == 0:
             min_distance = float("inf")
-            for source in sim.sources:
+            possible_sources = [source for source in sim.sources if source.type not in self.current_activity]
+            for source in possible_sources:
                 dx = self.x - source.x
                 dy = self.y - source.y
-                distance = sqrt(dx**2 + dy**2)
+                distance = dx**2 + dy**2
                 if distance < min_distance:
-                    min_distance  = distance
+                    min_distance = distance
                     self.target = source
     
     def move_towards_target(self):

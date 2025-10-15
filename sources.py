@@ -26,7 +26,7 @@ class Source:
                                       type))
 
     def draw(self, sim, screen):
-        source_size = 2
+        source_size = 3
         source_x = ((self.x - sim.camera_x) * sim.zoom) + (sim.screen_x / 2)
         source_y = ((self.y - sim.camera_y) * sim.zoom) + (sim.screen_y / 2)
         r = 255 if self.type == "food" else 0

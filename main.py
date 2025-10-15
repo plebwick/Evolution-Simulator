@@ -29,7 +29,7 @@ graph_screen = 0
 ##############
 
 while True:
-
+    start_time = time()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -93,6 +93,18 @@ while True:
         sim.draw_simulation(screen)
         sim.draw_ui(screen, font)
         #########temp
+
+        stat, rect = font.render(f"{len(sim.sources)}",  (0, 0, 0))
+        screen.blit(stat, (50, 150))
+
+        timer = time()-start_time
+        stat, rect = font.render(f"{round(1/timer)}FPS",  (0, 0, 0))
+        screen.blit(stat, (10, 10))
+
+        if round(1/timer,2) > 60:
+            sim.FPS *= (1.01)
+        elif round(1/timer,2) < 60:
+            sim.FPS /= (1.01)
         
         ############
 
