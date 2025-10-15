@@ -1,6 +1,6 @@
 import pygame, pyautogui
 from random import randint, uniform
-from math import pi
+from math import pi, ceil
 from sources import Source
 from people import Person
 from people import Genes
@@ -25,15 +25,15 @@ class Simulation:
         self.zoom_speed = 0.05
 
         self.grid = defaultdict(list)
-        self.grid_size = 1
+        self.grid_size = 500
 
         self.day = 0
         self.year_length = 365
         self.mutation_rate = 1
 
-        self.starting_population = 400
+        self.starting_population = 200
 
-        total = 1000
+        total = 400
         self.food_max = total/2
         self.water_max = total/2
         self.food_water_chance = 0.5
@@ -41,13 +41,14 @@ class Simulation:
     def create_people(self):
         self.people = [Person(x = randint(0,self.world_x_size),
                  y = randint(0,self.world_y_size),
+                 grid = None,
                  direction = uniform(0,2*pi),
                  target = None,
                  genes = Genes(
                      uniform(4,6),
                      uniform(0.25,1),
                      uniform(0.1,0.2),
-                     uniform(0,100),
+                     uniform(50,100),
                      uniform(0,100),
                      uniform(0,100),
                      uniform(0,100),
@@ -63,42 +64,65 @@ class Simulation:
                  for i in range(self.starting_population)]
     
     def create_sources(self):
-        self.sources = [Source(randint(0,self.world_x_size),
+        self.sources = [Source(
+                      randint(0,self.world_x_size),
                       randint(0,self.world_y_size),
+                      None,
                       "food" if uniform(0,1) > self.food_water_chance else "water")
                       for i in range(100)]
         
     def update_simulation(self):
-        t0 = perf_counter()
+        #t0 = perf_counter()
         Source.respawn(self)
-        t1 = perf_counter()
         for person in self.people:
+            #t1 = perf_counter()
             person.step(self)
             person.decide_current_action(self)
+            #t2 = perf_counter()
             person.scan(self)
-            person.wander(self)
-        t2 = perf_counter()
-        self.update_grid(self.sources + self.people)
-        t3 = perf_counter()
-
-        print(f"respawn={t1-t0:.4f}s | people={t2-t1:.4f}s | grid={t3-t2:.4f}s | total={t3-t0:.4f}s")
+            #t3 = perf_counter()
+            if person.target:
+                person.move_towards_target(self)
+            else:
+                person.wander(self)
+        self.update_grid(self.people)
+        #t4 = perf_counter()
+        #print(f"respawn={t1-t0:.4f}s | people={t2-t1:.4f}s | grid={t3-t2:.4f}s | scan={t3-t2:.4f}s / total={t3-t0:.4f}s")
 
     def update_grid(self, objects):
-        for grid_object in self.grid.values():
-            grid_object.clear()
-        #self.grid.clear()
-
-        grid_size = self.grid_size
-        grid = self.grid
-
-        for object in objects:
-            location = (int(object.x // grid_size), int(object.y // grid_size))
-            grid[location].append(object)
-
-    def check_grid(self, x, y):
-        person_location = (int(x // self.grid_size), int(y // self.grid_size))
-        return [object for object in self.grid[person_location] if object.x != x and object.y != y and isinstance(object, Source)]
+        for grid_object in objects:
+            new_grid_location = int(grid_object.x // self.grid_size), int(grid_object.y // self.grid_size)
+            if new_grid_location !=  grid_object.grid:
+                if grid_object.grid:
+                    self.grid.get(grid_object.grid).remove(grid_object)
+                self.grid[new_grid_location].append(grid_object)
+                grid_object.grid = new_grid_location
     
+        #for grid_object in self.grid.values():
+        #    grid_object.clear()
+        #self.grid.clear()
+        #for object in objects:
+        #    location = (int(object.x // self.grid_size), int(object.y // self.grid_size))
+        #    self.grid[location].append(object)
+
+    def check_grid(self, person):
+        #person_location = (int(person.x // self.grid_size), int(person.y // self.grid_size))
+        #return [object for object in self.grid[person_location] if object.x != person.x and object.y != person.y and isinstance(object, Source)]
+        person_grid_location_x, person_grid_location_y = int(person.x // self.grid_size), int(person.y // self.grid_size)
+        grid_vision_range = ceil(person.genes.vision_range / self.grid_size)
+
+        objects = []
+        for dx in range(-grid_vision_range, grid_vision_range + 1):
+            for dy in range(-grid_vision_range, grid_vision_range + 1):
+                grid_location = person_grid_location_x + dx, person_grid_location_y + dy
+                grid_objects = self.grid.get(grid_location, [])
+                for obj in grid_objects:
+                    if isinstance(obj, Source):
+                        objects.append(obj)
+                #if isinstance(object, Source):
+                 #   objects.append(object)
+        return objects 
+
     def display_grid(self, screen):
         for i in range(self.world_x_size//self.grid_size + 1):
             x = (i*self.grid_size - self.camera_x) * self.zoom + self.screen_x/2
@@ -140,7 +164,7 @@ class Simulation:
                 stat, rect = font.render(f"Direction: {person.direction}",  (0, 0, 0))
                 screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 30))
 
-                stat, rect = font.render(f"Direction: {person.target.type}",  (0, 0, 0))
+                stat, rect = font.render(f"Direction: {person.target}",  (0, 0, 0))
                 screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 50))
         
         screen.blit(text_1, (50, 50))

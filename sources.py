@@ -5,14 +5,16 @@ class Source:
     def __init__(self,
                  x,
                  y,
+                 grid,
                  type):
         
         self.x,self.y = (x,y)
+        self.grid = grid
         self.type = type
 
     def respawn(sim):
         if len(sim.sources) < (sim.food_max + sim.water_max):
-            if uniform(0,1) > 0.1:
+            if uniform(0,1) > 0.05:
                 random_source = sim.sources[randint(0,len(sim.sources)-1)]
                 x = random_source.x + randint(-50,50)
                 y = random_source.y + randint(-50,50)
@@ -21,9 +23,13 @@ class Source:
                 x = randint(0,sim.world_x_size)
                 y = randint(0,sim.world_y_size)
                 type = "food" if uniform(0,1) > sim.food_water_chance else "water"
-            sim.sources.append(Source(x,
-                                      y,
-                                      type))
+            grid_location = int(x // sim.grid_size), int(y // sim.grid_size)
+            new_source = Source(x,
+                                y,
+                                None,
+                                type)
+            sim.sources.append(new_source)
+            sim.grid[grid_location].append(new_source)
 
     def draw(self, sim, screen):
         source_size = 3

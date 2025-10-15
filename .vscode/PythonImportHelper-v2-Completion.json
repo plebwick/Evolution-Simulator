@@ -121,7 +121,23 @@
         "documentation": {}
     },
     {
+        "label": "atan2",
+        "importPath": "math",
+        "description": "math",
+        "isExtraImport": true,
+        "detail": "math",
+        "documentation": {}
+    },
+    {
         "label": "pi",
+        "importPath": "math",
+        "description": "math",
+        "isExtraImport": true,
+        "detail": "math",
+        "documentation": {}
+    },
+    {
+        "label": "ceil",
         "importPath": "math",
         "description": "math",
         "isExtraImport": true,
@@ -270,7 +286,7 @@
         "kind": 6,
         "importPath": "people",
         "description": "people",
-        "peekOfCode": "class Person:\n    def __init__(self,\n                 x,\n                 y,\n                 direction,\n                 target,\n                 genes,\n                 age,\n                 postnatal_elapsed,\n                 gestation_period,",
+        "peekOfCode": "class Person:\n    def __init__(self,\n                 x,\n                 y,\n                 grid,\n                 direction,\n                 target,\n                 genes,\n                 age,\n                 postnatal_elapsed,",
         "detail": "people",
         "documentation": {}
     },
@@ -297,7 +313,7 @@
         "kind": 6,
         "importPath": "sources",
         "description": "sources",
-        "peekOfCode": "class Source:\n    def __init__(self,\n                 x,\n                 y,\n                 type):\n        self.x,self.y = (x,y)\n        self.type = type\n    def respawn(sim):\n        if len(sim.sources) < (sim.food_max + sim.water_max):\n            if uniform(0,1) > 0.1:",
+        "peekOfCode": "class Source:\n    def __init__(self,\n                 x,\n                 y,\n                 grid,\n                 type):\n        self.x,self.y = (x,y)\n        self.grid = grid\n        self.type = type\n    def respawn(sim):",
         "detail": "sources",
         "documentation": {}
     }

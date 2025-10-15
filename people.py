@@ -1,4 +1,4 @@
-from math import sin, cos, pi, sqrt
+from math import sin, cos, pi, sqrt, atan2
 from random import uniform, randint
 import pygame
 
@@ -6,6 +6,7 @@ class Person:
     def __init__(self,
                  x,
                  y,
+                 grid,
                  direction,
                  target,
                  genes,
@@ -18,6 +19,7 @@ class Person:
                  ):
         
         self.x,self.y = (x,y)
+        self.grid = grid
         self.direction = direction
         self.velocity = genes.speed
         self.target = target
@@ -59,16 +61,17 @@ class Person:
             self.current_activity = "find_food"
 
     def scan(self, sim):
-        sources = sim.check_grid(self.x, self.y)
-        if sources:
-            min_distance = float("inf")
-            possible_sources = [source for source in sources if source.type not in self.current_activity]
-            for source in possible_sources:
-                dx = self.x - source.x
-                dy = self.y - source.y
-                distance = dx**2 + dy**2
-                #if distance < self.genes.vision_range:
-                if distance < min_distance:
+        if self.age % 60 == 0:
+            sources = sim.check_grid(self)
+            if sources:
+                min_distance = float("inf")
+                possible_sources = [source for source in sources if source.type not in self.current_activity]
+                for source in possible_sources:
+                    dx = self.x - source.x
+                    dy = self.y - source.y
+                    distance = dx**2 + dy**2
+                    #if distance < self.genes.vision_range:
+                    if distance < min_distance:
                         min_distance = distance
                         self.target = source
         """
@@ -83,13 +86,32 @@ class Person:
                     min_distance = distance
                     self.target = source
         """
-    def move_towards_target(self):
-        pass
+    def move_towards_target(self, sim):
+        dx = self.target.x - self.x
+        dy = self.target.y - self.y
+        target_direction = atan2(dy, dx)
+
+        self.direction %= 2 * pi
+
+        if target_direction > self.direction and abs(target_direction - self.direction) <= pi:
+            self.direction +=  uniform(0.1,0.2)
+        elif target_direction > self.direction and abs(target_direction - self.direction) >= pi:
+            self.direction -=  uniform(0.1,0.2)
+
+        elif target_direction < self.direction and abs(target_direction - self.direction) <= pi:
+            self.direction -=  uniform(0.1,0.2)
+        elif target_direction < self.direction and abs(target_direction - self.direction) >= pi:
+            self.direction +=  uniform(0.1,0.2)
+
+        dx = cos(self.direction) * self.velocity
+        dy = sin(self.direction) * self.velocity
+        self.x += dx
+        self.y += dy
 
     def wander(self, sim):
         dx = cos(self.direction) * self.velocity
         dy = sin(self.direction) * self.velocity
-
+        
         self.direction += uniform(-self.genes.agility,self.genes.agility)
         self.x += dx
         self.y += dy
