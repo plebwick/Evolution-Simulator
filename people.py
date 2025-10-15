@@ -1,4 +1,4 @@
-from math import sin, cos, pi
+from math import sin, cos, pi, sqrt
 from random import uniform, randint
 import pygame
 
@@ -59,7 +59,15 @@ class Person:
             self.current_activity = "find_food"
 
     def scan(self, sim):
-        pass
+        if self.age % 60 == 0:
+            min_distance = float("inf")
+            for source in sim.sources:
+                dx = self.x - source.x
+                dy = self.y - source.y
+                distance = sqrt(dx**2 + dy**2)
+                if distance < min_distance:
+                    min_distance  = distance
+                    self.target = source
     
     def move_towards_target(self):
         pass

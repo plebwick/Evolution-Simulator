@@ -113,6 +113,14 @@
         "documentation": {}
     },
     {
+        "label": "sqrt",
+        "importPath": "math",
+        "description": "math",
+        "isExtraImport": true,
+        "detail": "math",
+        "documentation": {}
+    },
+    {
         "label": "pi",
         "importPath": "math",
         "description": "math",

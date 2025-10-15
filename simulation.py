@@ -26,6 +26,8 @@ class Simulation:
         self.year_length = 365
         self.mutation_rate = 1
 
+        self.starting_population = 500
+
         self.food_max = 500
         self.water_max = 500
         self.food_water_chance = 0.5
@@ -53,7 +55,7 @@ class Simulation:
                  hydrated = 1000,
                  current_activity = None
                  )
-                 for i in range(300)]
+                 for i in range(self.starting_population)]
     
     def create_sources(self):
         self.sources = [Source(randint(0,self.world_x_size),
@@ -66,6 +68,7 @@ class Simulation:
         for person in self.people:
             person.step(self)
             person.decide_current_action(self)
+            person.scan(self)
             person.wander(self)
     
     def draw_simulation(self, screen):
@@ -94,6 +97,9 @@ class Simulation:
 
                 stat, rect = font.render(f"Direction: {person.direction}",  (0, 0, 0))
                 screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 30))
+
+                stat, rect = font.render(f"Direction: {person.target.type}",  (0, 0, 0))
+                screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 50))
         
         screen.blit(text_1, (50, 50))
         screen.blit(text_2, (50, 100))
