@@ -34,7 +34,7 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-
+ 
     #Key Presses
     keys = pygame.key.get_pressed()
 
@@ -49,7 +49,7 @@ while True:
             sim.camera_y += sim.move_speed
         if keys[pygame.K_a]:
             sim.camera_x -= sim.move_speed
-        if keys[pygame.K_d]:
+        if keys[pygame.K_d]: 
             sim.camera_x += sim.move_speed
         if keys[pygame.K_e]:
             sim.zoom *= (1 + sim.zoom_speed)

@@ -33,7 +33,8 @@ class Simulation:
 
         self.starting_population = 200
 
-        total = 400
+        total = 600
+        self.starting_sources = 100
         self.food_max = total/2
         self.water_max = total/2
         self.food_water_chance = 0.5
@@ -47,9 +48,9 @@ class Simulation:
                  genes = Genes(
                      uniform(4,6),
                      uniform(0.25,1),
-                     uniform(0.1,0.2),
-                     uniform(50,100),
-                     uniform(0,100),
+                     uniform(0.05,0.1),
+                     uniform(200,400),
+                     uniform(0,pi),
                      uniform(0,100),
                      uniform(0,100),
                      uniform(0,100),
@@ -64,30 +65,51 @@ class Simulation:
                  for i in range(self.starting_population)]
     
     def create_sources(self):
-        self.sources = [Source(
-                      randint(0,self.world_x_size),
-                      randint(0,self.world_y_size),
-                      None,
-                      "food" if uniform(0,1) > self.food_water_chance else "water")
-                      for i in range(100)]
+        for i in range(self.starting_sources):
+            x = randint(0,self.world_x_size)
+            y = randint(0,self.world_y_size)
+            type = "food" if uniform(0,1) > self.food_water_chance else "water"
+            grid_location = int(x // self.grid_size), int(y // self.grid_size)
+            new_source = Source(x,
+                                y,
+                                None,
+                                type)
+            self.sources.append(new_source)
+            self.grid[grid_location].append(new_source)
+    
+    def normalise_coordinate(self, z, xory):
+        if xory:
+            return((z - self.camera_y) * self.zoom) + (self.screen_y / 2)
+        else:
+            return((z - self.camera_x) * self.zoom) + (self.screen_x / 2)
         
     def update_simulation(self):
-        #t0 = perf_counter()
+        t0 = perf_counter()
         Source.respawn(self)
+        t1 = perf_counter()
         for person in self.people:
-            #t1 = perf_counter()
+            t2 = perf_counter()
             person.step(self)
+            t3 = perf_counter()
+            t4 = perf_counter()
+            t5 = perf_counter()
             person.decide_current_action(self)
-            #t2 = perf_counter()
-            person.scan(self)
-            #t3 = perf_counter()
             if person.target:
-                person.move_towards_target(self)
+                person.angle_towards_target(self)
+                person.check_distance(self)
             else:
-                person.wander(self)
+                person.scan(self)
+                person.angle_wander(self)
+            t6 = perf_counter()
+            person.move(self)
+            t7 = perf_counter()
         self.update_grid(self.people)
-        #t4 = perf_counter()
-        #print(f"respawn={t1-t0:.4f}s | people={t2-t1:.4f}s | grid={t3-t2:.4f}s | scan={t3-t2:.4f}s / total={t3-t0:.4f}s")
+        t8 = perf_counter()
+        #print(
+        #f"respawn={t1-t0:.10f}s | step={t3-t2:.10f}s | decide={t4-t3:.10f}s | "
+        #f"scan={t5-t4:.10f}s | angle={t6-t5:.10f}s | move={t7-t6:.10f}s | "
+        #f"grid={t8-t7:.10f}s | total={t8-t0:.10f}s"
+        #)
 
     def update_grid(self, objects):
         for grid_object in objects:
@@ -119,8 +141,6 @@ class Simulation:
                 for obj in grid_objects:
                     if isinstance(obj, Source):
                         objects.append(obj)
-                #if isinstance(object, Source):
-                 #   objects.append(object)
         return objects 
 
     def display_grid(self, screen):
@@ -150,7 +170,7 @@ class Simulation:
         pygame.draw.rect(screen, (255,255,255), border_rect, max(1,round(5*self.zoom)))
 
     def draw_ui(self, screen, font):
-        #self.display_grid(screen)
+        self.display_grid(screen)
         text_1, rect = font.render(f"Speed: {self.FPS/60}",  (0, 0, 0))
         text_2, rect = font.render(f"Zoom:  {self.zoom}",  (0, 0, 0))
         mouse_pos = pyautogui.position()
@@ -161,11 +181,14 @@ class Simulation:
                 stat, rect = font.render(f"Current activity: {person.current_activity}",  (0, 0, 0))
                 screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 10))
 
-                stat, rect = font.render(f"Direction: {person.direction}",  (0, 0, 0))
+                stat, rect = font.render(f"Satiety: {person.satiety}",  (0, 0, 0))
                 screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 30))
 
-                stat, rect = font.render(f"Direction: {person.target}",  (0, 0, 0))
+                stat, rect = font.render(f"Hydration: {person.hydrated}",  (0, 0, 0))
                 screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 50))
+
+                stat, rect = font.render(f"Target: {person.target}",  (0, 0, 0))
+                screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 70))
         
         screen.blit(text_1, (50, 50))
         screen.blit(text_2, (50, 100))

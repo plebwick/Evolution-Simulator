@@ -14,7 +14,7 @@ class Source:
 
     def respawn(sim):
         if len(sim.sources) < (sim.food_max + sim.water_max):
-            if uniform(0,1) > 0.05:
+            if uniform(0,1) > 1 and len(sim.sources) > 0:
                 random_source = sim.sources[randint(0,len(sim.sources)-1)]
                 x = random_source.x + randint(-50,50)
                 y = random_source.y + randint(-50,50)

@@ -1,4 +1,5 @@
 from math import sin, cos, pi, sqrt, atan2
+import math
 from random import uniform, randint
 import pygame
 
@@ -37,9 +38,23 @@ class Person:
 
     def draw(self, sim, screen):
         person_size = self.genes.size
-        person_x = ((self.x - sim.camera_x) * sim.zoom) + (sim.screen_x / 2)
-        person_y = ((self.y - sim.camera_y) * sim.zoom) + (sim.screen_y / 2)
+        person_x = sim.normalise_coordinate(self.x, 0)
+        person_y = sim.normalise_coordinate(self.y, 1)
         pygame.draw.circle(screen, (255,255,255), (person_x, person_y), max(1,person_size*sim.zoom))
+        
+        p0 = (person_x, person_y)
+        angle1 = self.direction-self.genes.vision_angle/2
+        x1 = (self.x + cos(angle1) * self.genes.vision_range)
+        y1 = (self.y + sin(angle1) * self.genes.vision_range)
+
+        angle2 = self.direction+self.genes.vision_angle/2
+        x2 = (self.x + cos(angle2) * self.genes.vision_range)
+        y2 = (self.y + sin(angle2) * self.genes.vision_range)
+
+        pygame.draw.polygon(screen, (0,255,0), [p0,(sim.normalise_coordinate(x1, 0),sim.normalise_coordinate(y1, 1)),(sim.normalise_coordinate(x2, 0),sim.normalise_coordinate(y2, 1))], 1)
+
+
+        #pygame.draw.polygon(screen, (0,255,0, 50), [x, y, vision_range*2, vision_range*2], lower_angle, higher_angle, 200)
 
     def step(self, sim):
         self.age += 1
@@ -49,6 +64,7 @@ class Person:
 
         ##############temp
         self.satiety -= 70 * (self.genes.size**0.65) * (self.genes.speed**0.25) * 1/365 * 1/6
+        self.hydrated -= 70 * (self.genes.size**0.65) * (self.genes.speed**0.25) * 1/365 * 1/6
         ##################
 
         #if self.satiety <= 0 or self.hydrated <=0: sim.people.remove(self)
@@ -56,24 +72,27 @@ class Person:
 
     def decide_current_action(self, sim):
         if self.satiety > self.hydrated:
-            self.current_activity = "find_water"
+            self.current_activity = "water"
         else:
-            self.current_activity = "find_food"
+            self.current_activity = "food"
 
     def scan(self, sim):
         if self.age % 60 == 0:
             sources = sim.check_grid(self)
             if sources:
                 min_distance = float("inf")
-                possible_sources = [source for source in sources if source.type not in self.current_activity]
+                possible_sources = [source for source in sources if source.type == self.current_activity]
+                #possible_sources = sources
                 for source in possible_sources:
-                    dx = self.x - source.x
-                    dy = self.y - source.y
+                    dx = source.x - self.x
+                    dy = source.y - self.y
                     distance = dx**2 + dy**2
-                    #if distance < self.genes.vision_range:
-                    if distance < min_distance:
-                        min_distance = distance
-                        self.target = source
+                    if distance < self.genes.vision_range**2:
+                        target_direction = atan2(dy, dx)
+                        if abs((target_direction - self.direction + pi) % (2*pi) - pi) < self.genes.vision_angle/2:
+                            if distance < min_distance:
+                                min_distance = distance
+                                self.target = source
         """
         if self.age % 60 == 0:
             min_distance = float("inf")
@@ -86,33 +105,42 @@ class Person:
                     min_distance = distance
                     self.target = source
         """
-    def move_towards_target(self, sim):
+    
+    def angle_towards_target(self, sim):
         dx = self.target.x - self.x
         dy = self.target.y - self.y
         target_direction = atan2(dy, dx)
+        
+        angle_diff = (target_direction - self.direction + pi) % (2*pi) - pi
 
-        self.direction %= 2 * pi
+        if angle_diff > self.genes.agility:
+            self.direction += self.genes.agility
+        elif angle_diff < -self.genes.agility:
+            self.direction -= self.genes.agility
+        else:self.direction = target_direction
 
-        if target_direction > self.direction and abs(target_direction - self.direction) <= pi:
-            self.direction +=  uniform(0.1,0.2)
-        elif target_direction > self.direction and abs(target_direction - self.direction) >= pi:
-            self.direction -=  uniform(0.1,0.2)
+    def check_distance(self,sim):
+        dx = self.target.x - self.x
+        dy = self.target.y - self.y
+        distance = dx**2 + dy**2
+        if distance < self.genes.vision_range**2:
+            try:
+                sim.sources.remove(self.target)
+                if self.current_activity == "food":
+                    self.satiety += 1
+                else:
+                    self.hydrated += 1
+                self.target = None
+            except:
+                self.target = None
 
-        elif target_direction < self.direction and abs(target_direction - self.direction) <= pi:
-            self.direction -=  uniform(0.1,0.2)
-        elif target_direction < self.direction and abs(target_direction - self.direction) >= pi:
-            self.direction +=  uniform(0.1,0.2)
+    def angle_wander(self, sim):
+        self.direction += uniform(-0.15,0.15)
 
-        dx = cos(self.direction) * self.velocity
-        dy = sin(self.direction) * self.velocity
-        self.x += dx
-        self.y += dy
-
-    def wander(self, sim):
+    def move(self, sim):
         dx = cos(self.direction) * self.velocity
         dy = sin(self.direction) * self.velocity
         
-        self.direction += uniform(-self.genes.agility,self.genes.agility)
         self.x += dx
         self.y += dy
 
