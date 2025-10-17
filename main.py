@@ -24,13 +24,13 @@ font = pygame.freetype.Font("font.otf", 24)
 
 previous_time = time()
 needed = 0
-previous_needed = 0
 graph_screen = 0
 ##############
 
 while True:
     start_time = time()
-    for event in pygame.event.get():
+    events = pygame.event.get()
+    for event in events:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
@@ -39,6 +39,27 @@ while True:
     keys = pygame.key.get_pressed()
 
     if graph_screen != True:
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+
+                #toggle pause
+                if event.key == pygame.K_SPACE:
+                    if sim.FPS == 0:
+                        previous_time = time()
+                        sim.FPS = previous_fps
+                    else:
+                        previous_fps = sim.FPS
+                        sim.FPS = 0
+
+                #toggle grid
+                if event.key == pygame.K_g:
+                    if sim.toggle_grid: sim.toggle_grid = False
+                    else: sim.toggle_grid = True
+
+                #toggle vision radius
+                if event.key == pygame.K_v:
+                    if sim.toggle_vision_radius: sim.toggle_vision_radius = False
+                    else: sim.toggle_vision_radius = True
 
         #Speed and zoom
         sim.move_speed = 20/(sim.zoom)
@@ -61,17 +82,10 @@ while True:
             sim.camera_y = sim.world_y_size/2
         if keys[pygame.K_LCTRL]:
             sim.FPS /= (1 + sim.zoom_speed)
-            sim.FPS = max(60, min(3000, sim.FPS))
+            sim.FPS = max(60, min(6000, sim.FPS))
         if keys[pygame.K_LSHIFT]:
             sim.FPS *= (1 + sim.zoom_speed)
-            sim.FPS = max(60, min(3000, sim.FPS))
-        if keys[pygame.K_SPACE]:
-            if sim.FPS == 0:
-                previous_time = time()
-                sim.FPS = previous_fps
-            else:
-                previous_fps = sim.FPS
-                sim.FPS = 0
+            sim.FPS = max(60, min(6000, sim.FPS))
         
         sim.zoom = max(0.1, min(50, sim.zoom))
 
@@ -82,16 +96,15 @@ while True:
             previous_time = current_time
 
             needed += frame_time
-            if needed > 0.5:
-                sim.FPS /= (1 + sim.zoom_speed)
-            previous_needed = needed
+            needed = min(needed,0.01)
+
             
             while needed >= 1/sim.FPS:
                 sim.update_simulation()
                 needed -= 1/sim.FPS
 
-        sim.draw_simulation(screen)
-        sim.draw_ui(screen, font)
+        sim.draw_simulation()
+        sim.draw_ui(font)
         #########temp
 
         stat, rect = font.render(f"{len(sim.sources)}",  (0, 0, 0))
