@@ -203,6 +203,14 @@
         "documentation": {}
     },
     {
+        "label": "Graph",
+        "importPath": "graph",
+        "description": "graph",
+        "isExtraImport": true,
+        "detail": "graph",
+        "documentation": {}
+    },
+    {
         "label": "Person",
         "importPath": "people",
         "description": "people",
@@ -227,11 +235,20 @@
         "documentation": {}
     },
     {
+        "label": "Graph",
+        "kind": 6,
+        "importPath": "graph",
+        "description": "graph",
+        "peekOfCode": "class Graph:\n    def __init__(self,\n                 gene,\n                 colour,\n                 display,\n                 values = []):\n        self.gene = gene\n        self.colour = colour\n        self.display = display\n        self.values = values",
+        "detail": "graph",
+        "documentation": {}
+    },
+    {
         "label": "main",
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def main():\n    pygame.init()\n    clock = pygame.time.Clock()\n    sim = Simulation()\n    screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\n    pygame.display.set_caption(\"Evolution Simulation\")\n    sim.create_people()\n    sim.create_sources()\n    #######temp\n    font = pygame.freetype.Font(\"font.otf\", 24)",
+        "peekOfCode": "def main():\n    pygame.init()\n    clock = pygame.time.Clock()\n    sim = Simulation()\n    screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\n    pygame.display.set_caption(\"Evolution Simulation\")\n    sim.create_people()\n    sim.create_sources()\n    sim.create_graphs()\n    #######temp",
         "detail": "main",
         "documentation": {}
     },
@@ -258,7 +275,7 @@
         "kind": 6,
         "importPath": "simulation",
         "description": "simulation",
-        "peekOfCode": "class Simulation:\n    def __init__(self):    \n        self.people = []\n        self.sources = []\n        self.permanent_sources = []\n        self.graphs = []\n        self.screen_x = 2560\n        self.screen_y = 1440\n        self.screen = pygame.display.set_mode((self.screen_x,self.screen_y))\n        self.FPS = 60",
+        "peekOfCode": "class Simulation:\n    def __init__(self):    \n        self.people = []\n        self.sources = []\n        self.permanent_sources = []\n        self.graphs = []\n        self.screen_x = 2560\n        self.screen_y = 1440\n        self.screen = pygame.display.set_mode((self.screen_x,self.screen_y))\n        self.events = None",
         "detail": "simulation",
         "documentation": {}
     },

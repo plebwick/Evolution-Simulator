@@ -38,7 +38,5 @@ class Source:
         source_size = 3
         source_x = ((self.x - sim.camera_x) * sim.zoom) + (sim.screen_x / 2)
         source_y = ((self.y - sim.camera_y) * sim.zoom) + (sim.screen_y / 2)
-        r = 255 if self.type == "food" else 0
-        g = 0
-        b = 255 if self.type == "water" else 0
-        pygame.draw.circle(sim.screen, (r,g,b), (source_x, source_y), max(1,source_size*sim.zoom))
+        colour = "#8F2323" if self.type == "food" else "#30B3FF"
+        pygame.draw.circle(sim.screen, colour, (source_x, source_y), max(1,source_size*sim.zoom))

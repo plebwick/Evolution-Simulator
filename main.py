@@ -18,10 +18,9 @@ def main():
 
     sim.create_people()
     sim.create_sources()
-
+    sim.create_graphs()
+    
     #######temp
-
-    font = pygame.freetype.Font("font.otf", 24)
 
     previous_time = time()
     needed = 0
@@ -32,8 +31,8 @@ def main():
     while True:
     #for i in range(1000):
         start_time = time()
-        events = pygame.event.get()
-        for event in events:
+        sim.events = pygame.event.get()
+        for event in sim.events:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
@@ -44,7 +43,7 @@ def main():
         if current_screen == "start":
             pass
         elif current_screen == "sim":
-            for event in events:
+            for event in sim.events:
                 if event.type == pygame.KEYDOWN:
                     #toggle pause
                     if event.key == pygame.K_SPACE:
@@ -93,12 +92,12 @@ def main():
                 sim.camera_y = sim.world_y_size/2
             if keys[pygame.K_LCTRL]:
                 sim.FPS /= (1 + sim.zoom_speed)
-                sim.FPS = max(60, min(6000, sim.FPS))
+                sim.FPS = max(60, min(12000, sim.FPS))
             if keys[pygame.K_LSHIFT]:
                 sim.FPS *= (1 + sim.zoom_speed)
-                sim.FPS = max(60, min(6000, sim.FPS))
+                sim.FPS = max(60, min(12000, sim.FPS))
             
-            sim.zoom = max(0.1, min(50, sim.zoom))
+            sim.zoom = max(0.05, min(100, sim.zoom))
 
             #Main simulation
             if sim.FPS:
@@ -107,7 +106,7 @@ def main():
                 previous_time = current_time
 
                 needed += frame_time
-                needed = min(needed,0.01)
+                needed = min(needed,0.1)
 
                 
                 while needed >= 1/sim.FPS:
@@ -116,12 +115,12 @@ def main():
 
             if draw == "sim":
                 sim.draw_simulation()
-                sim.draw_ui(font)
+                sim.draw_simulation_ui()
             elif draw == "graph":
-                sim.screen.fill("#843723")
+                sim.draw_graphs()
 
         timer = time()-start_time
-        stat, rect = font.render(f"{round(1/timer)}FPS",  (0, 0, 0))
+        stat, rect = sim.font.render(f"{round(1/timer)}FPS",  (0, 0, 0))
         screen.blit(stat, (10, 10))
 
         if round(1/timer,2) > 60:

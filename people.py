@@ -66,8 +66,8 @@ class Person:
 
     def step(self, sim):
         self.age += 1
-        #try:self.postnatal_elapsed += 1
-        #except:pass
+        try:self.postnatal_elapsed += 1
+        except:pass
 
         if self.target:
             if self.target not in sim.sources:
@@ -78,14 +78,18 @@ class Person:
         self.hydrated -= 70 * self.genes.size * self.genes.speed * 1/365 * 1/20
         ##################
 
-        if self.satiety <= 0 or self.hydrated <=0: sim.people.remove(self)
+        if self.satiety <= 0 or self.hydrated <=0: 
+            sim.people.remove(self)
+            if sim.selected_person == self:
+                sim.selected_person = None
+
         #elif uniform(0,1) < (0.2 + (0.00008*(self.age**2)))/29200: sim.people.remove(self)
 
     def decide_current_action(self, sim):
-        if self.age % 60 == 0:
+        if self.age % 120 == 0 or self.current_activity == None:
             food_water_chance = self.hydrated/(self.satiety+self.hydrated)
 
-            if uniform(0,1) > food_water_chance: self.current_activity = "food"
+            if uniform(0,1) < food_water_chance: self.current_activity = "food"
             else: self.current_activity = "water"
             #if self.satiety > self.hydrated: self.current_activity = "water"
             #else: self.current_activity = "food"
@@ -129,14 +133,14 @@ class Person:
         distance = dx**2 + dy**2
         if distance < self.genes.size:
             try:sim.sources.remove(self.target)
-            except:pass#print("list.remove(x): x not in list")
+            except:pass
             try:sim.grid[self.target.grid].remove(self.target)
             except:pass
-            #print(self.target.grid)
 
             if self.current_activity == "food": self.satiety += 1000
             else: self.hydrated += 1000
             self.target = None
+            self.current_activity = None
 
     def angle_wander(self, sim):
         self.direction += uniform(-0.1,0.10)

@@ -1,7 +1,8 @@
-import pygame, pyautogui
+import pygame, pyautogui, inspect
 from random import randint, uniform
 from math import pi, ceil
 from sources import Source
+from graph import Graph
 from people import Person
 from people import Genes
 from collections import defaultdict
@@ -19,15 +20,19 @@ class Simulation:
 
         self.screen = pygame.display.set_mode((self.screen_x,self.screen_y))
 
+        self.events = None
         self.FPS = 60
         self.world_x_size = 2560*4
         self.world_y_size = 1440*4
+
+        self.font = pygame.freetype.Font("font.otf", 24)
 
         self.camera_x = self.world_x_size/2
         self.camera_y = self.world_y_size/2
         self.zoom = 0.25
         self.move_speed = 20/(self.zoom)
         self.zoom_speed = 0.05
+        self.selected_person = None
 
         self.grid = defaultdict(list)
         self.grid_size = 250
@@ -39,7 +44,7 @@ class Simulation:
         self.year_length = 365
         self.mutation_rate = 1
 
-        self.starting_population = 200
+        self.starting_population = 400
 
         total = 1000
         self.permanent_sources_number = 10
@@ -59,10 +64,15 @@ class Simulation:
                      uniform(1.05,1.1),
                      uniform(200,400),
                      uniform(0,pi),
-                     uniform(0,100),
-                     uniform(0,100),
-                     uniform(0,100),
-                     uniform(0,100)),
+                     1,
+                     1,
+                     1,
+                     1
+                     #uniform(0,1),
+                     #uniform(0,1),
+                     #uniform(0,1),
+                     #uniform(0,1)),
+                 ),
                  age = randint(0,100),
                  postnatal_elapsed = None,
                  gestation_period = None,
@@ -79,17 +89,39 @@ class Simulation:
             type = "food" if uniform(0,1) > self.food_water_chance else "water"
             p = (x,y,type)
             self.permanent_sources.append(p)
+        
+    def create_graphs(self):
+        gene_dict = {
+            "size": "blue",
+            "speed": "red",
+            "agility": "yellow",
+            "vision_range": "green",
+            "vision_angle": "lightgreen",
+            "fertility":"#131729",
+            "virility":"#131729",
+            "male_chance":"#131729",
+            "gestation_period":"#131729"
+        }
+        gene_method = Genes.__init__
+        gene = inspect.signature(gene_method)
 
+        for gene in gene.parameters:
+            if gene != "self":
+                self.graphs.append(Graph(gene,
+                                   gene_dict[gene],
+                                   False,
+                                   []))
+ 
     def normalise_coordinate(self, z, xory):
         if xory: return((z - self.camera_y) * self.zoom) + (self.screen_y / 2)
         else:    return((z - self.camera_x) * self.zoom) + (self.screen_x / 2)
     
+    #@profile
     def update_simulation(self):
         self.day += 1
         #t0 = perf_counter()
         Source.respawn(self)
         #t1 = perf_counter()
-
         for person in self.people:
             #s0 = perf_counter()
             person.step(self)
@@ -109,6 +141,10 @@ class Simulation:
 
         #t2 = perf_counter()
         self.update_grid(self.people)
+
+        if self.day % 10 == 0:
+            for graph in self.graphs:
+                graph.log(self)
         #t3 = perf_counter()
         #print(f"respawn={t1-t0:.6f}s | step={t2-t1:.6f}s | decide={t3-t2:.6f}s | ")
         #f"respawn={t1-t0:.10f}s | step={t3-t2:.10f}s | decide={t4-t3:.10f}s | "
@@ -155,8 +191,7 @@ class Simulation:
             pygame.draw.line(self.screen, (255,255,255), (x1,y), (x2, y), 1)
 
     def draw_simulation(self):
-        self.screen.fill("#5473ff")
-        self.screen.fill("white")
+        self.screen.fill("#131729")
 
         for person in self.people:
             person.draw(self)
@@ -167,31 +202,53 @@ class Simulation:
         border_rect = pygame.Rect(((-self.camera_x * self.zoom) + self.screen_x/2),((-self.camera_y * self.zoom) + self.screen_y/2),round(self.world_x_size*self.zoom),round(self.world_y_size*self.zoom))
         pygame.draw.rect(self.screen, (255,255,255), border_rect, max(1,round(5*self.zoom)))
 
-    def draw_ui(self, font):
+    def draw_simulation_ui(self):
         if self.toggle_grid:
             self.display_grid()
+        
         mouse_pos = pyautogui.position()
+
         for person in self.people:
             if self.toggle_vision_radius:
                 person.draw_vision_radius(self)
-            person_x = ((person.x - self.camera_x) * self.zoom) + (self.screen_x / 2)
-            person_y = ((person.y - self.camera_y) * self.zoom) + (self.screen_y / 2)
+            person_x = self.normalise_coordinate(person.x, 0)
+            person_y = self.normalise_coordinate(person.y, 1)
             if abs(mouse_pos[0] - person_x) < person.genes.size*self.zoom and abs(mouse_pos[1] - person_y) < person.genes.size*self.zoom:
-                person.draw_vision_radius(self)
-                stat, rect = font.render(f"Current activity: {person.current_activity}",  (0, 0, 0))
-                self.screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 10))
+                self.draw_hover_ui(person)
+                for event in self.events:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if self.selected_person:
+                            self.selected_person = None
+                        else:
+                            self.selected_person = person
 
-                stat, rect = font.render(f"Satiety: {person.satiety}",  (0, 0, 0))
-                self.screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 30))
-
-                stat, rect = font.render(f"Hydration: {person.hydrated}",  (0, 0, 0))
-                self.screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 50))
-
-                stat, rect = font.render(f"Target: {person.target}",  (0, 0, 0))
-                self.screen.blit(stat, (mouse_pos[0] + 10, mouse_pos[1] + 70))
+        if self.selected_person: 
+            person_size = self.selected_person.genes.size
+            person_x = self.normalise_coordinate(self.selected_person.x, 0)
+            person_y = self.normalise_coordinate(self.selected_person.y, 1)
+            pygame.draw.circle(self.screen, "gold", (person_x, person_y), max(1,person_size*self.zoom*2))
+            self.draw_hover_ui(self.selected_person)
         
-        text_1, rect = font.render(f"Speed: {self.FPS/60}",  (0, 0, 0))
-        text_2, rect = font.render(f"Zoom:  {self.zoom}",  (0, 0, 0))
+        text_1, rect = self.font.render(f"Speed: {self.FPS/60}",  (255, 255, 255))
+        text_2, rect = self.font.render(f"Zoom:  {self.zoom}",  (255, 255, 255))
 
         self.screen.blit(text_1, (50, 50))
         self.screen.blit(text_2, (50, 100))
+
+    def draw_hover_ui(self, person):
+        person.draw_vision_radius(self)
+        stat, rect = self.font.render(f"Current activity: {person.current_activity}",  (255, 255, 255))
+        self.screen.blit(stat, (100, 100))
+
+        stat, rect = self.font.render(f"Satiety: {person.satiety}",  (255, 255, 255))
+        self.screen.blit(stat, (100, 300))
+
+        stat, rect = self.font.render(f"Hydration: {person.hydrated}",  (255, 255, 255))
+        self.screen.blit(stat, (100, 500))
+
+        stat, rect = self.font.render(f"Target: {person.target}",  (255, 255, 255))
+        self.screen.blit(stat, (100, 700))
+    def draw_graphs(self):
+        self.screen.fill("#131729")
+        for graph in self.graphs:
+            graph.draw(self)
