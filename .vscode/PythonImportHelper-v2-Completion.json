@@ -9,6 +9,14 @@
         "documentation": {}
     },
     {
+        "label": "LineProfiler",
+        "importPath": "line_profiler",
+        "description": "line_profiler",
+        "isExtraImport": true,
+        "detail": "line_profiler",
+        "documentation": {}
+    },
+    {
         "label": "Simulation",
         "importPath": "simulation",
         "description": "simulation",
@@ -219,65 +227,11 @@
         "documentation": {}
     },
     {
-        "label": "clock",
-        "kind": 5,
+        "label": "main",
+        "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "clock = pygame.time.Clock()\nsim = Simulation()\nscreen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.create_people()\nsim.create_sources()\n#######temp\nfont = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "sim",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "sim = Simulation()\nscreen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.create_people()\nsim.create_sources()\n#######temp\nfont = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0\ngraph_screen = 0",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "screen",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\npygame.display.set_caption(\"Evolution Simulation\")\nsim.create_people()\nsim.create_sources()\n#######temp\nfont = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0\ngraph_screen = 0\n##############",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "font",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "font = pygame.freetype.Font(\"font.otf\", 24)\nprevious_time = time()\nneeded = 0\ngraph_screen = 0\n##############\nwhile True:\n    start_time = time()\n    events = pygame.event.get()\n    for event in events:\n        if event.type == pygame.QUIT:",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "previous_time",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "previous_time = time()\nneeded = 0\ngraph_screen = 0\n##############\nwhile True:\n    start_time = time()\n    events = pygame.event.get()\n    for event in events:\n        if event.type == pygame.QUIT:\n            pygame.quit()",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "needed",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "needed = 0\ngraph_screen = 0\n##############\nwhile True:\n    start_time = time()\n    events = pygame.event.get()\n    for event in events:\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()",
-        "detail": "main",
-        "documentation": {}
-    },
-    {
-        "label": "graph_screen",
-        "kind": 5,
-        "importPath": "main",
-        "description": "main",
-        "peekOfCode": "graph_screen = 0\n##############\nwhile True:\n    start_time = time()\n    events = pygame.event.get()\n    for event in events:\n        if event.type == pygame.QUIT:\n            pygame.quit()\n            exit()\n    #Key Presses",
+        "peekOfCode": "def main():\n    pygame.init()\n    clock = pygame.time.Clock()\n    sim = Simulation()\n    screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\n    pygame.display.set_caption(\"Evolution Simulation\")\n    sim.create_people()\n    sim.create_sources()\n    #######temp\n    font = pygame.freetype.Font(\"font.otf\", 24)",
         "detail": "main",
         "documentation": {}
     },

@@ -41,7 +41,9 @@ class Person:
         person_x = sim.normalise_coordinate(self.x, 0)
         person_y = sim.normalise_coordinate(self.y, 1)
         colour = (255,255,255)
+        
         if self.target: colour = (0,0,255) if self.target.type == "water" else (255,0,0)
+        else: colour = (255,128,128) if self.current_activity == "food" else (128,128,255)
         pygame.draw.circle(sim.screen, colour, (person_x, person_y), max(1,person_size*sim.zoom))
 
     def draw_vision_radius(self,sim):
@@ -76,15 +78,17 @@ class Person:
         self.hydrated -= 70 * self.genes.size * self.genes.speed * 1/365 * 1/20
         ##################
 
-        #if self.satiety <= 0 or self.hydrated <=0: sim.people.remove(self)
+        if self.satiety <= 0 or self.hydrated <=0: sim.people.remove(self)
         #elif uniform(0,1) < (0.2 + (0.00008*(self.age**2)))/29200: sim.people.remove(self)
 
     def decide_current_action(self, sim):
         if self.age % 60 == 0:
-            if self.satiety > self.hydrated:
-                self.current_activity = "water"
-            else:
-                self.current_activity = "food"
+            food_water_chance = self.hydrated/(self.satiety+self.hydrated)
+
+            if uniform(0,1) > food_water_chance: self.current_activity = "food"
+            else: self.current_activity = "water"
+            #if self.satiety > self.hydrated: self.current_activity = "water"
+            #else: self.current_activity = "food"
 
     def scan(self, sim):
         if self.age % 60 == 0:
@@ -104,18 +108,7 @@ class Person:
                             if distance < min_distance:
                                 min_distance = distance
                                 self.target = source
-        """
-        if self.age % 60 == 0:
-            min_distance = float("inf")
-            possible_sources = [source for source in sim.sources if source.type not in self.current_activity]
-            for source in possible_sources:
-                dx = self.x - source.x
-                dy = self.y - source.y
-                distance = dx**2 + dy**2
-                if distance < min_distance:
-                    min_distance = distance
-                    self.target = source
-        """
+                                #return
     
     def angle_towards_target(self, sim):
         dx = self.target.x - self.x
@@ -129,7 +122,7 @@ class Person:
         elif angle_diff < -self.genes.agility:
             self.direction -= self.genes.agility
         else:self.direction = target_direction
-
+    
     def check_distance(self,sim):
         dx = self.target.x - self.x
         dy = self.target.y - self.y
@@ -146,7 +139,7 @@ class Person:
             self.target = None
 
     def angle_wander(self, sim):
-        self.direction += uniform(-0.15,0.15)
+        self.direction += uniform(-0.1,0.10)
 
     def move(self, sim):
         dx = cos(self.direction) * self.velocity
@@ -159,14 +152,14 @@ class Person:
             self.x = sim.world_x_size
             self.direction *= -1
             self.direction -= pi
-        if self.x < 0:
+        elif self.x < 0:
             self.x = 0
             self.direction *= -1
             self.direction -= pi
         if self.y > sim.world_y_size:
             self.y = sim.world_y_size
             self.direction *= -1
-        if self.y < 0:
+        elif self.y < 0:
             self.y = 0
             self.direction *= -1
 

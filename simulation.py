@@ -30,7 +30,7 @@ class Simulation:
         self.zoom_speed = 0.05
 
         self.grid = defaultdict(list)
-        self.grid_size = 400
+        self.grid_size = 250
 
         self.toggle_grid = False
         self.toggle_vision_radius = False
@@ -39,10 +39,10 @@ class Simulation:
         self.year_length = 365
         self.mutation_rate = 1
 
-        self.starting_population = 400
+        self.starting_population = 200
 
         total = 1000
-        self.permanent_sources_number = 100
+        self.permanent_sources_number = 10
         self.food_max = total/2
         self.water_max = total/2
         self.food_water_chance = 0.5
@@ -79,27 +79,13 @@ class Simulation:
             type = "food" if uniform(0,1) > self.food_water_chance else "water"
             p = (x,y,type)
             self.permanent_sources.append(p)
-        """
-        for i in range(100):
-            x = randint(0,self.world_x_size)
-            y = randint(0,self.world_y_size)
-            type = "food" if uniform(0,1) > self.food_water_chance else "water"
-            grid_location = int(x // self.grid_size), int(y // self.grid_size)
-            new_source = Source(x,
-                                y,
-                                grid_location,
-                                type)
-            self.sources.append(new_source)
-            self.grid[grid_location].append(new_source)
-        """
 
     def normalise_coordinate(self, z, xory):
-        if xory:
-            return((z - self.camera_y) * self.zoom) + (self.screen_y / 2)
-        else:
-            return((z - self.camera_x) * self.zoom) + (self.screen_x / 2)
-        
+        if xory: return((z - self.camera_y) * self.zoom) + (self.screen_y / 2)
+        else:    return((z - self.camera_x) * self.zoom) + (self.screen_x / 2)
+    
     def update_simulation(self):
+        self.day += 1
         #t0 = perf_counter()
         Source.respawn(self)
         #t1 = perf_counter()
@@ -108,12 +94,12 @@ class Simulation:
             #s0 = perf_counter()
             person.step(self)
             #s1 = perf_counter()
-            person.decide_current_action(self)
             #s2 = perf_counter()
             if person.target:
                 person.angle_towards_target(self)
                 person.check_distance(self)
             else:
+                person.decide_current_action(self)
                 person.scan(self)
                 person.angle_wander(self)
             #s3 = perf_counter()
@@ -170,6 +156,7 @@ class Simulation:
 
     def draw_simulation(self):
         self.screen.fill("#5473ff")
+        self.screen.fill("white")
 
         for person in self.people:
             person.draw(self)
