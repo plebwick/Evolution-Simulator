@@ -10,10 +10,11 @@ class Person:
                  grid,
                  direction,
                  target,
+                 sex,
                  genes,
                  age,
                  postnatal_elapsed,
-                 gestation_period,
+                 current_gestational_period,
                  satiety,
                  hydrated,
                  current_activity
@@ -25,12 +26,14 @@ class Person:
         self.velocity = genes.speed
         self.target = target
 
+        self.sex = sex
         self.genes = genes
 
         self.age = age
         self.postnatal_elapsed = postnatal_elapsed
-        self.gestation_period = gestation_period
+        self.current_gestational_period = current_gestational_period
 
+        self.metabolic_rate = 70 * self.genes.size * self.genes.speed * 1/365 * 1/20
         self.satiety = satiety
         self.hydrated = hydrated
 
@@ -66,23 +69,21 @@ class Person:
 
     def step(self, sim):
         self.age += 1
-        try:self.postnatal_elapsed += 1
-        except:pass
+        if self.postnatal_elapsed: self.postnatal_elapsed += 1
 
         if self.target:
             if self.target not in sim.sources:
                 self.target = None
 
         ##############temp
-        self.satiety -= 70 * self.genes.size * self.genes.speed * 1/365 * 1/20
-        self.hydrated -= 70 * self.genes.size * self.genes.speed * 1/365 * 1/20
+        self.satiety -= self.metabolic_rate
+        self.hydrated -= self.metabolic_rate
         ##################
-
-        if self.satiety <= 0 or self.hydrated <=0: 
+        
+        if self.satiety < 0 or self.hydrated < 0: 
             sim.people.remove(self)
             if sim.selected_person == self:
                 sim.selected_person = None
-
         #elif uniform(0,1) < (0.2 + (0.00008*(self.age**2)))/29200: sim.people.remove(self)
 
     def decide_current_action(self, sim):
@@ -137,13 +138,13 @@ class Person:
             try:sim.grid[self.target.grid].remove(self.target)
             except:pass
 
-            if self.current_activity == "food": self.satiety += 1000
-            else: self.hydrated += 1000
+            if self.current_activity == "food": self.satiety += sim.food_water_size
+            else: self.hydrated += sim.food_water_size
             self.target = None
             self.current_activity = None
 
     def angle_wander(self, sim):
-        self.direction += uniform(-0.1,0.10)
+        self.direction += uniform(-0.05,0.05)
 
     def move(self, sim):
         dx = cos(self.direction) * self.velocity

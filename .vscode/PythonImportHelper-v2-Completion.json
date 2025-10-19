@@ -257,7 +257,7 @@
         "kind": 6,
         "importPath": "people",
         "description": "people",
-        "peekOfCode": "class Person:\n    def __init__(self,\n                 x,\n                 y,\n                 grid,\n                 direction,\n                 target,\n                 genes,\n                 age,\n                 postnatal_elapsed,",
+        "peekOfCode": "class Person:\n    def __init__(self,\n                 x,\n                 y,\n                 grid,\n                 direction,\n                 target,\n                 sex,\n                 genes,\n                 age,",
         "detail": "people",
         "documentation": {}
     },

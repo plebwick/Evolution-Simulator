@@ -35,7 +35,7 @@ class Simulation:
         self.selected_person = None
 
         self.grid = defaultdict(list)
-        self.grid_size = 250
+        self.grid_size = 400
 
         self.toggle_grid = False
         self.toggle_vision_radius = False
@@ -47,7 +47,8 @@ class Simulation:
         self.starting_population = 400
 
         total = 1000
-        self.permanent_sources_number = 10
+        self.permanent_sources_number = 25
+        self.food_water_size = 250
         self.food_max = total/2
         self.water_max = total/2
         self.food_water_chance = 0.5
@@ -58,11 +59,12 @@ class Simulation:
                  grid = None,
                  direction = uniform(0,2*pi),
                  target = None,
+                 sex = "male" if uniform(0,1) > 0.5 else "female",
                  genes = Genes(
                      uniform(4,6),
                      uniform(0.25,1),
                      uniform(1.05,1.1),
-                     uniform(200,400),
+                     uniform(200,600),
                      uniform(0,pi),
                      1,
                      1,
@@ -75,7 +77,7 @@ class Simulation:
                  ),
                  age = randint(0,100),
                  postnatal_elapsed = None,
-                 gestation_period = None,
+                 current_gestational_period = None,
                  satiety = 1000,
                  hydrated = 1000,
                  current_activity = None
@@ -116,7 +118,6 @@ class Simulation:
         if xory: return((z - self.camera_y) * self.zoom) + (self.screen_y / 2)
         else:    return((z - self.camera_x) * self.zoom) + (self.screen_x / 2)
     
-    #@profile
     def update_simulation(self):
         self.day += 1
         #t0 = perf_counter()
@@ -142,7 +143,7 @@ class Simulation:
         #t2 = perf_counter()
         self.update_grid(self.people)
 
-        if self.day % 10 == 0:
+        if self.day % 100 == 0:
             for graph in self.graphs:
                 graph.log(self)
         #t3 = perf_counter()
@@ -190,6 +191,10 @@ class Simulation:
             x2 = (self.world_x_size - self.camera_x) * self.zoom + self.screen_x/2
             pygame.draw.line(self.screen, (255,255,255), (x1,y), (x2, y), 1)
 
+    def draw_text(self, x, y, text, variable, colour = (255, 255, 255)):
+        text, rect = self.font.render(f"{text} {variable}",  (255, 255, 255))
+        self.screen.blit(text, (x, y))
+
     def draw_simulation(self):
         self.screen.fill("#131729")
 
@@ -208,6 +213,11 @@ class Simulation:
         
         mouse_pos = pyautogui.position()
 
+        for event in self.events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.selected_person:
+                    self.selected_person = None
+
         for person in self.people:
             if self.toggle_vision_radius:
                 person.draw_vision_radius(self)
@@ -217,10 +227,7 @@ class Simulation:
                 self.draw_hover_ui(person)
                 for event in self.events:
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        if self.selected_person:
-                            self.selected_person = None
-                        else:
-                            self.selected_person = person
+                        self.selected_person = person
 
         if self.selected_person: 
             person_size = self.selected_person.genes.size
@@ -229,25 +236,32 @@ class Simulation:
             pygame.draw.circle(self.screen, "gold", (person_x, person_y), max(1,person_size*self.zoom*2))
             self.draw_hover_ui(self.selected_person)
         
-        text_1, rect = self.font.render(f"Speed: {self.FPS/60}",  (255, 255, 255))
-        text_2, rect = self.font.render(f"Zoom:  {self.zoom}",  (255, 255, 255))
-
-        self.screen.blit(text_1, (50, 50))
-        self.screen.blit(text_2, (50, 100))
+        self.draw_text(50, 50, "Speed", self.FPS/60)
+        self.draw_text(50, 100, "Zoom", self.zoom)
+        self.draw_text(50, 150, "Population", len(self.people))
+        self.draw_text(50, 200, "Sources Amount", len(self.sources))
 
     def draw_hover_ui(self, person):
         person.draw_vision_radius(self)
-        stat, rect = self.font.render(f"Current activity: {person.current_activity}",  (255, 255, 255))
-        self.screen.blit(stat, (100, 100))
 
-        stat, rect = self.font.render(f"Satiety: {person.satiety}",  (255, 255, 255))
-        self.screen.blit(stat, (100, 300))
+        self.draw_text(100, 300, "Current activity:", person.current_activity)
+        self.draw_text(100, 350, "Satiety:", person.satiety)
+        self.draw_text(100, 400, "Hydration:", person.hydrated)
+        self.draw_text(100, 450, "Age:", person.age)
+        self.draw_text(100, 500, "Sex:", person.sex)
+        
+        gene_method = Genes.__init__
+        gene = inspect.signature(gene_method)
 
-        stat, rect = self.font.render(f"Hydration: {person.hydrated}",  (255, 255, 255))
-        self.screen.blit(stat, (100, 500))
+        count = 0
+        for gene in gene.parameters:
+            if gene == "self":
+                continue
+            text = str(gene)[0].upper() + gene[1:] + ":"
+            gene_value = getattr(person.genes, gene)
+            self.draw_text(100, 550+count*50, text, gene_value)
+            count += 1
 
-        stat, rect = self.font.render(f"Target: {person.target}",  (255, 255, 255))
-        self.screen.blit(stat, (100, 700))
     def draw_graphs(self):
         self.screen.fill("#131729")
         for graph in self.graphs:

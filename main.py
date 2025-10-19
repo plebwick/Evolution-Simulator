@@ -19,11 +19,11 @@ def main():
     sim.create_people()
     sim.create_sources()
     sim.create_graphs()
-    
+
     #######temp
 
     previous_time = time()
-    needed = 0
+    needed = 0 
     current_screen = "sim"
     draw = "sim"
     ##############
@@ -106,7 +106,7 @@ def main():
                 previous_time = current_time
 
                 needed += frame_time
-                needed = min(needed,0.1)
+                needed = min(needed,0.05)
 
                 
                 while needed >= 1/sim.FPS:
@@ -120,8 +120,8 @@ def main():
                 sim.draw_graphs()
 
         timer = time()-start_time
-        stat, rect = sim.font.render(f"{round(1/timer)}FPS",  (0, 0, 0))
-        screen.blit(stat, (10, 10))
+
+        sim.draw_text(10, 10, round(1/timer), "FPS")
 
         if round(1/timer,2) > 60:
             sim.FPS *= (1.005)
