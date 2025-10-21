@@ -48,7 +48,7 @@ class Simulation:
 
         total = 1000
         self.permanent_sources_number = 25
-        self.food_water_size = 250
+        self.food_water_size = 100
         self.food_max = total/2
         self.water_max = total/2
         self.food_water_chance = 0.5
@@ -61,7 +61,7 @@ class Simulation:
                  target = None,
                  sex = "male" if uniform(0,1) > 0.5 else "female",
                  genes = Genes(
-                     uniform(4,6),
+                     uniform(2,10),
                      uniform(0.25,1),
                      uniform(1.05,1.1),
                      uniform(200,600),
@@ -99,10 +99,10 @@ class Simulation:
             "agility": "yellow",
             "vision_range": "green",
             "vision_angle": "lightgreen",
-            "fertility":"#131729",
-            "virility":"#131729",
-            "male_chance":"#131729",
-            "gestation_period":"#131729"
+            "fertility":"#FFFFFF",
+            "virility":"#FFFFFF",
+            "male_chance":"#FFFFFF",
+            "gestation_period":"#FFFFFF"
         }
         gene_method = Genes.__init__
         gene = inspect.signature(gene_method)
@@ -264,5 +264,7 @@ class Simulation:
 
     def draw_graphs(self):
         self.screen.fill("#131729")
-        for graph in self.graphs:
-            graph.draw(self)
+        chosen_graph = self.graphs[0]
+        chosen_graph.draw(self)
+        #for graph in self.graphs:
+        #    graph.draw(self)
