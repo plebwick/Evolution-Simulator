@@ -14,9 +14,6 @@ class Simulation:
         self.sources = []
         self.permanent_sources = []
 
-        self.graphs = []
-        self.selected_graph = 0
-
         self.gene_dict = {
             "size": "blue",
             "speed": "red",
@@ -31,6 +28,10 @@ class Simulation:
 
         self.screen_x = 1920
         self.screen_y = 1080
+
+        self.graphs = []
+        self.selected_graph = 0
+        self.graph_time = self.screen_x
 
         self.screen = pygame.display.set_mode((self.screen_x,self.screen_y))
 
@@ -307,6 +308,10 @@ class Simulation:
                         self.selected_graph -= 1
                     else:
                         self.selected_graph = len(self.graphs)-1
+                if event.key == pygame.K_UP:
+                    self.graph_time *= 2
+                if event.key == pygame.K_DOWN:
+                    self.graph_time /= 2
 
     def draw_graphs(self):
         self.screen.fill("#131729")

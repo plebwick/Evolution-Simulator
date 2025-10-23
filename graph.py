@@ -24,9 +24,7 @@ class Graph:
         x_offset = (sim.screen_x - sim.screen_x*0.8)/2
         y_offset = (sim.screen_y - sim.screen_y*0.8)/2
 
-        time = round(graph_x_size*4)
-
-        values = self.values[-time:]
+        values = self.values[-round(sim.graph_time):]
 
         min_value = min(values)-min(values)*0.1 if values else 0
         max_value = max(values)+max(values)*0.1 if values else 1
@@ -44,7 +42,7 @@ class Graph:
 
         if len(points) > 2: pygame.draw.lines(sim.screen, self.colour, 0, points, 4)
 
-        display_time = min(len(values), time)
+        display_time = min(len(values), sim.graph_time)
 
         #draws the text
         sim.draw_text(x_offset, y_offset+graph_y_size+10, display_time, "ticks ago")
