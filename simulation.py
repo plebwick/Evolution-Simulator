@@ -39,7 +39,7 @@ class Simulation:
         self.world_x_size = self.screen_x*4
         self.world_y_size = self.screen_y*4
 
-        self.font = pygame.font.Font("font.otf", 24)
+        self.font = pygame.font.Font("Pompadour.otf", 24)
 
         self.camera_x = self.world_x_size/2
         self.camera_y = self.world_y_size/2
@@ -298,16 +298,20 @@ class Simulation:
         for event in self.events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
-                    self.selected_graph += 1
+                    if self.selected_graph < len(self.graphs)-1: 
+                        self.selected_graph += 1
+                    else:
+                        self.selected_graph = 0
                 if event.key == pygame.K_LEFT:
-                    self.selected_graph -= 1
+                    if self.selected_graph > 0: 
+                        self.selected_graph -= 1
+                    else:
+                        self.selected_graph = len(self.graphs)-1
 
     def draw_graphs(self):
         self.screen.fill("#131729")
         self.draw_grid()
         self.graphs[self.selected_graph].draw(self)
-        #for graph in self.graphs:
-        #    graph.draw(self)
 
     def draw_grid(self):
         graph_x_size = round(self.screen_x*0.8,-2)
@@ -340,16 +344,15 @@ class Simulation:
         y_size = self.screen_y*0.1*0.25
         x_size = graph_x_size/(len(genes.parameters)-1)
 
-        print(genes.parameters)
         for i, gene in enumerate(genes.parameters):
             if gene != "self":
                 x_pos = x_offset + (i-1)*x_size
 
                 rect = pygame.Rect(x_pos, y_size , x_size, y_size*2)
                 surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
-                print(gene, self.selected_graph)
-                if gene != self.graphs[self.selected_graph].gene:
-                    surface.set_alpha(128)
+
+                if gene != self.graphs[self.selected_graph].gene: surface.set_alpha(128)
+
                 pygame.draw.rect(surface, self.gene_dict[gene], surface.get_rect())
                 self.screen.blit(surface, rect)
 
