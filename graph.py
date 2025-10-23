@@ -23,7 +23,7 @@ class Graph:
 
         x_offset = (sim.screen_x - sim.screen_x*0.8)/2
         y_offset = (sim.screen_y - sim.screen_y*0.8)/2
-        
+
         time = round(graph_x_size*4)
 
         values = self.values[-time:]

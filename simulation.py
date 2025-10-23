@@ -17,6 +17,18 @@ class Simulation:
         self.graphs = []
         self.selected_graph = 0
 
+        self.gene_dict = {
+            "size": "blue",
+            "speed": "red",
+            "agility": "yellow",
+            "vision_range": "green",
+            "vision_angle": "lightgreen",
+            "fertility":"#FFFFFF",
+            "virility":"#FFFFFF",
+            "male_chance":"#FFFFFF",
+            "gestation_period":"#FFFFFF"
+        }
+
         self.screen_x = 1920
         self.screen_y = 1080
 
@@ -95,24 +107,13 @@ class Simulation:
             self.permanent_sources.append(p)
         
     def create_graphs(self):
-        gene_dict = {
-            "size": "red",
-            "speed": "red",
-            "agility": "yellow",
-            "vision_range": "green",
-            "vision_angle": "lightgreen",
-            "fertility":"#FFFFFF",
-            "virility":"#FFFFFF",
-            "male_chance":"#FFFFFF",
-            "gestation_period":"#FFFFFF"
-        }
         gene_method = Genes.__init__
         gene = inspect.signature(gene_method)
 
         for gene in gene.parameters:
             if gene != "self":
                 self.graphs.append(Graph(gene,
-                                   gene_dict[gene],
+                                   self.gene_dict[gene],
                                    False,
                                    []))
  
@@ -336,10 +337,10 @@ class Simulation:
         gene = inspect.signature(gene_method)
 
         y_size = self.screen_y*0.1*0.25
-        x_size = graph_x_size/len(gene.parameters)
+        x_size = graph_x_size/(len(gene.parameters)-1)
 
-        for gene in range(len(gene.parameters)-1):
+        for i, gene in enumerate(gene.parameters):
             if gene != "self":
-                x_pos = x_offset + i*x_size
+                x_pos = x_offset + (i-1)*x_size
                 rect = pygame.Rect(x_pos, y_size , x_size, y_size*2)
-                pygame.draw.rect(self.screen, "#2E3863", rect)
+                pygame.draw.rect(self.screen, self.gene_dict[gene], rect)
