@@ -13,17 +13,19 @@ class Simulation:
         self.people = []
         self.sources = []
         self.permanent_sources = []
-        self.graphs = []
 
-        self.screen_x = 2560
-        self.screen_y = 1440
+        self.graphs = []
+        self.selected_graph = 0
+
+        self.screen_x = 1920
+        self.screen_y = 1080
 
         self.screen = pygame.display.set_mode((self.screen_x,self.screen_y))
 
         self.events = None
         self.FPS = 60
-        self.world_x_size = 2560*4
-        self.world_y_size = 1440*4
+        self.world_x_size = self.screen_x*4
+        self.world_y_size = self.screen_y*4
 
         self.font = pygame.freetype.Font("font.otf", 24)
 
@@ -44,7 +46,7 @@ class Simulation:
         self.year_length = 365
         self.mutation_rate = 1
 
-        self.starting_population = 400
+        self.starting_population = 100
 
         total = 1000
         self.permanent_sources_number = 25
@@ -94,7 +96,7 @@ class Simulation:
         
     def create_graphs(self):
         gene_dict = {
-            "size": "blue",
+            "size": "red",
             "speed": "red",
             "agility": "yellow",
             "vision_range": "green",
@@ -153,6 +155,34 @@ class Simulation:
         #f"grid={t8-t7:.10f}s | total={t8-t0:.10f}s"
         #)
 
+    def simulation_inputs(self):
+        self.move_speed = 20/(self.zoom)
+
+        if self.keys[pygame.K_w]:
+            self.camera_y -= self.move_speed
+        if self.keys[pygame.K_s]:
+            self.camera_y += self.move_speed
+        if self.keys[pygame.K_a]:
+            self.camera_x -= self.move_speed
+        if self.keys[pygame.K_d]: 
+            self.camera_x += self.move_speed
+        if self.keys[pygame.K_e]:
+            self.zoom *= (1 + self.zoom_speed)
+        if self.keys[pygame.K_q]:
+            self.zoom /= (1 + self.zoom_speed)
+        if self.keys[pygame.K_r]:
+            self.zoom = 1
+            self.camera_x = self.world_x_size/2
+            self.camera_y = self.world_y_size/2
+        if self.keys[pygame.K_LCTRL]:
+            self.FPS /= (1 + self.zoom_speed)
+            self.FPS = max(60, min(12000, self.FPS))
+        if self.keys[pygame.K_LSHIFT]:
+            self.FPS *= (1 + self.zoom_speed)
+            self.FPS = max(60, min(12000, self.FPS))
+        
+        self.zoom = max(0.05, min(100, self.zoom))
+    
     def update_grid(self, objects):
         for grid_object in objects:
             new_grid_location = int(grid_object.x // self.grid_size), int(grid_object.y // self.grid_size)
@@ -262,9 +292,54 @@ class Simulation:
             self.draw_text(100, 550+count*50, text, gene_value)
             count += 1
 
+    def graph_inputs(self):
+        for event in self.events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    self.selected_graph += 1
+                if event.key == pygame.K_LEFT:
+                    self.selected_graph -= 1
+
     def draw_graphs(self):
         self.screen.fill("#131729")
-        chosen_graph = self.graphs[0]
-        chosen_graph.draw(self)
+        self.draw_grid()
+        self.graphs[self.selected_graph].draw(self)
         #for graph in self.graphs:
         #    graph.draw(self)
+
+    def draw_grid(self):
+        graph_x_size = round(self.screen_x*0.8,-2)
+        graph_y_size = round(self.screen_y*0.8,-2)
+
+        x_offset = (self.screen_x - self.screen_x*0.8)/2
+        y_offset = (self.screen_y - self.screen_y*0.8)/2
+
+        grid_size = 100
+        for i in range(round(graph_x_size/grid_size)+1):
+            x = i*grid_size + x_offset
+            y1 = y_offset
+            y2 = y_offset + round(graph_y_size, -2)
+            pygame.draw.line(self.screen, "#5B6FC7", (x,y1), (x, y2), 1)
+
+        for i in range(round(graph_y_size/grid_size)+1):
+            y = i*grid_size + y_offset
+            x1 = x_offset
+            x2 = x_offset + round(graph_x_size, -2)
+            pygame.draw.line(self.screen, "#5B6FC7", (x1,y), (x2, y), 1)
+
+    def draw_graph_ui(self):
+        graph_x_size = round(self.screen_x*0.8,-2)
+
+        x_offset = (self.screen_x - self.screen_x*0.8)/2
+
+        gene_method = Genes.__init__
+        gene = inspect.signature(gene_method)
+
+        y_size = self.screen_y*0.1*0.25
+        x_size = graph_x_size/len(gene.parameters)
+
+        for gene in range(len(gene.parameters)-1):
+            if gene != "self":
+                x_pos = x_offset + i*x_size
+                rect = pygame.Rect(x_pos, y_size , x_size, y_size*2)
+                pygame.draw.rect(self.screen, "#2E3863", rect)
