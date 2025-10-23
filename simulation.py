@@ -39,7 +39,7 @@ class Simulation:
         self.world_x_size = self.screen_x*4
         self.world_y_size = self.screen_y*4
 
-        self.font = pygame.freetype.Font("font.otf", 24)
+        self.font = pygame.font.Font("font.otf", 24)
 
         self.camera_x = self.world_x_size/2
         self.camera_y = self.world_y_size/2
@@ -223,8 +223,9 @@ class Simulation:
             pygame.draw.line(self.screen, (255,255,255), (x1,y), (x2, y), 1)
 
     def draw_text(self, x, y, text, variable, colour = (255, 255, 255)):
-        text, rect = self.font.render(f"{text} {variable}",  (255, 255, 255))
-        self.screen.blit(text, (x, y))
+        text = self.font.render(f"{text} {variable}",  True, colour)
+        rect = text.get_rect(center = (x,y))
+        self.screen.blit(text, rect)
 
     def draw_simulation(self):
         self.screen.fill("#131729")
@@ -334,13 +335,22 @@ class Simulation:
         x_offset = (self.screen_x - self.screen_x*0.8)/2
 
         gene_method = Genes.__init__
-        gene = inspect.signature(gene_method)
+        genes = inspect.signature(gene_method)
 
         y_size = self.screen_y*0.1*0.25
-        x_size = graph_x_size/(len(gene.parameters)-1)
+        x_size = graph_x_size/(len(genes.parameters)-1)
 
-        for i, gene in enumerate(gene.parameters):
+        print(genes.parameters)
+        for i, gene in enumerate(genes.parameters):
             if gene != "self":
                 x_pos = x_offset + (i-1)*x_size
+
                 rect = pygame.Rect(x_pos, y_size , x_size, y_size*2)
-                pygame.draw.rect(self.screen, self.gene_dict[gene], rect)
+                surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+                print(gene, self.selected_graph)
+                if gene != self.graphs[self.selected_graph].gene:
+                    surface.set_alpha(128)
+                pygame.draw.rect(surface, self.gene_dict[gene], surface.get_rect())
+                self.screen.blit(surface, rect)
+
+                self.draw_text(x_pos + 0.5*x_size, y_size*2, gene[0].upper()+gene[1:], "", "#000000")
