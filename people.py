@@ -33,7 +33,7 @@ class Person:
         self.postnatal_elapsed = postnatal_elapsed
         self.current_gestational_period = current_gestational_period
 
-        self.metabolic_rate = 70 * self.genes.size * self.genes.speed * 1/365 * 1/20
+        self.metabolic_rate = 70 * self.genes.size * 1/365 * 1/20
         self.satiety = satiety
         self.hydrated = hydrated
 
@@ -45,7 +45,8 @@ class Person:
         person_y = sim.normalise_coordinate(self.y, 1)
         colour = (255,255,255)
         
-        if self.target: colour = (0,0,255) if self.target.type == "water" else (255,0,0)
+        if isinstance(self.target, Person): colour = (255,255,255)
+        elif self.target: colour = (0,0,255) if self.target.type == "water" else (255,0,0)
         else: colour = (255,128,128) if self.current_activity == "food" else (128,128,255)
         pygame.draw.circle(sim.screen, colour, (person_x, person_y), max(1,person_size*sim.zoom))
 
@@ -60,7 +61,7 @@ class Person:
             if i == 0:
                 angle = self.direction
             else:
-                angle = self.direction-self.genes.vision_angle/accuracy * i
+                angle = self.direction-(self.genes.vision_angle/accuracy * i)/2
             x = (self.x + cos(angle) * self.genes.vision_range)
             y = (self.y + sin(angle) * self.genes.vision_range)
             points.append((sim.normalise_coordinate(x, 0),sim.normalise_coordinate(y, 1)))
@@ -90,19 +91,28 @@ class Person:
         if self.age % 120 == 0 or self.current_activity == None:
             food_water_chance = self.hydrated/(self.satiety+self.hydrated)
 
-            if uniform(0,1) < food_water_chance: self.current_activity = "food"
-            else: self.current_activity = "water"
+            h = self.satiety
+            t = self.hydrated
+            energy_factor = (t*h) / ( ( t+ ( 300/self.genes.virility)) * (h + (300/self.genes.virility)) )
+            chance_to_mate = (energy_factor**5)
+            print(chance_to_mate)
+            random = chance_to_mate
+            if random > uniform(0,1): self.current_activity = "mate"
+            else:
+                if t > h: self.current_activity = "food"
+                else: self.current_activity = "water"
             #if self.satiety > self.hydrated: self.current_activity = "water"
             #else: self.current_activity = "food"
 
     def scan(self, sim):
         if self.age % 60 == 0:
-            sources = sim.check_grid(self)
-            if sources:
+            targets = sim.check_grid(self)
+
+            if targets and (self.current_activity == "food" or self.current_activity == "water"):
                 min_distance = float("inf")
-                possible_sources = [source for source in sources if source.type == self.current_activity]
-                #possible_sources = sources
-                for source in possible_sources:
+                possible_targets = [source for source in targets if source.type == self.current_activity]
+                #possible_targets = targets
+                for source in possible_targets:
                     dx = source.x - self.x
                     dy = source.y - self.y
                     distance = dx**2 + dy**2
@@ -113,7 +123,22 @@ class Person:
                             if distance < min_distance:
                                 min_distance = distance
                                 self.target = source
-                                #return
+
+            elif targets and self.current_activity == "mate":
+                min_distance = float("inf")
+                possible_targets = [target for target in targets if target.sex != self.sex]
+                #possible_targets = targets
+                for target in possible_targets:
+                    dx = target.x - self.x
+                    dy = target.y - self.y
+                    distance = dx**2 + dy**2
+                    distance = sqrt(distance)
+                    if distance < self.genes.vision_range:
+                        target_direction = atan2(dy, dx)
+                        if abs((target_direction - self.direction + pi) % (2*pi) - pi) < self.genes.vision_angle/2:
+                            if distance < min_distance:
+                                min_distance = distance
+                                self.target = target
     
     def angle_towards_target(self, sim):
         dx = self.target.x - self.x

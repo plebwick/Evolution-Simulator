@@ -1,4 +1,4 @@
-import pygame, pyautogui, inspect
+import pygame, inspect
 from random import randint, uniform
 from math import pi, ceil
 from sources import Source
@@ -13,19 +13,40 @@ class Simulation:
         self.people = []
         self.sources = []
         self.permanent_sources = []
-        self.graphs = []
 
-        self.screen_x = 2560
-        self.screen_y = 1440
+        self.gene_dict = {
+            "size": "blue",
+            "speed": "red",
+            "agility": "yellow",
+            "vision_range": "green",
+            "vision_angle": "lightgreen",
+            "fertility":"#FFFFFF",
+            "virility":"#FFFFFF",
+            "male_chance":"#FFFFFF",
+            "gestation_period":"#FFFFFF"
+        }
+
+        self.screen_x = 1920
+        self.screen_y = 1080
+
+        self.graphs = []
+        self.selected_graph = 0
+        self.graph_time = self.screen_x
+        self.graph_grid_size = 100
+        
+        self.graph_x_size = round(self.screen_x*0.8,-2)
+        self.graph_y_size = round(self.screen_y*0.8,-2)
+        self.x_offset = (self.screen_x - self.screen_x*0.8)/2
+        self.y_offset = (self.screen_y - self.screen_y*0.8)/2
 
         self.screen = pygame.display.set_mode((self.screen_x,self.screen_y))
 
         self.events = None
         self.FPS = 60
-        self.world_x_size = 2560*4
-        self.world_y_size = 1440*4
+        self.world_x_size = self.screen_x*4
+        self.world_y_size = self.screen_y*4
 
-        self.font = pygame.freetype.Font("font.otf", 24)
+        self.font = pygame.font.Font("Pompadour.otf", 24)
 
         self.camera_x = self.world_x_size/2
         self.camera_y = self.world_y_size/2
@@ -44,11 +65,11 @@ class Simulation:
         self.year_length = 365
         self.mutation_rate = 1
 
-        self.starting_population = 400
+        self.starting_population = 1000
 
-        total = 1000
-        self.permanent_sources_number = 25
-        self.food_water_size = 100
+        total = 100
+        self.permanent_sources_number = 5
+        self.food_water_size = 50
         self.food_max = total/2
         self.water_max = total/2
         self.food_water_chance = 0.5
@@ -64,16 +85,12 @@ class Simulation:
                      uniform(2,10),
                      uniform(0.25,1),
                      uniform(1.05,1.1),
-                     uniform(200,600),
-                     uniform(0,pi),
-                     1,
-                     1,
-                     1,
-                     1
-                     #uniform(0,1),
-                     #uniform(0,1),
-                     #uniform(0,1),
-                     #uniform(0,1)),
+                     uniform(100,1000),
+                     uniform(0,pi*2),
+                     uniform(0,1),
+                     uniform(0,1),
+                     uniform(0,1),
+                     uniform(0,1)
                  ),
                  age = randint(0,100),
                  postnatal_elapsed = None,
@@ -93,24 +110,13 @@ class Simulation:
             self.permanent_sources.append(p)
         
     def create_graphs(self):
-        gene_dict = {
-            "size": "blue",
-            "speed": "red",
-            "agility": "yellow",
-            "vision_range": "green",
-            "vision_angle": "lightgreen",
-            "fertility":"#FFFFFF",
-            "virility":"#FFFFFF",
-            "male_chance":"#FFFFFF",
-            "gestation_period":"#FFFFFF"
-        }
         gene_method = Genes.__init__
         gene = inspect.signature(gene_method)
 
         for gene in gene.parameters:
             if gene != "self":
                 self.graphs.append(Graph(gene,
-                                   gene_dict[gene],
+                                   self.gene_dict[gene],
                                    False,
                                    []))
  
@@ -153,6 +159,34 @@ class Simulation:
         #f"grid={t8-t7:.10f}s | total={t8-t0:.10f}s"
         #)
 
+    def simulation_inputs(self):
+        self.move_speed = 20/(self.zoom)
+
+        if self.keys[pygame.K_w]:
+            self.camera_y -= self.move_speed
+        if self.keys[pygame.K_s]:
+            self.camera_y += self.move_speed
+        if self.keys[pygame.K_a]:
+            self.camera_x -= self.move_speed
+        if self.keys[pygame.K_d]: 
+            self.camera_x += self.move_speed
+        if self.keys[pygame.K_e]:
+            self.zoom *= (1 + self.zoom_speed)
+        if self.keys[pygame.K_q]:
+            self.zoom /= (1 + self.zoom_speed)
+        if self.keys[pygame.K_r]:
+            self.zoom = 1
+            self.camera_x = self.world_x_size/2
+            self.camera_y = self.world_y_size/2
+        if self.keys[pygame.K_LCTRL]:
+            self.FPS /= (1 + self.zoom_speed)
+            self.FPS = max(60, min(12000, self.FPS))
+        if self.keys[pygame.K_LSHIFT]:
+            self.FPS *= (1 + self.zoom_speed)
+            self.FPS = max(60, min(12000, self.FPS))
+        
+        self.zoom = max(0.05, min(100, self.zoom))
+    
     def update_grid(self, objects):
         for grid_object in objects:
             new_grid_location = int(grid_object.x // self.grid_size), int(grid_object.y // self.grid_size)
@@ -174,8 +208,11 @@ class Simulation:
                 grid_location = person_grid_location_x + dx, person_grid_location_y + dy
                 grid_objects = self.grid.get(grid_location, [])
                 for obj in grid_objects:
-                    if isinstance(obj, Source):
-                        objects.append(obj)
+                    if person.current_activity == "food" or person.current_activity == "water":
+                        if isinstance(obj, Source): objects.append(obj)
+                    elif person.current_activity == "mate":
+                        if isinstance(obj, Person): objects.append(obj)
+
         return objects 
 
     def display_grid(self):
@@ -191,9 +228,11 @@ class Simulation:
             x2 = (self.world_x_size - self.camera_x) * self.zoom + self.screen_x/2
             pygame.draw.line(self.screen, (255,255,255), (x1,y), (x2, y), 1)
 
-    def draw_text(self, x, y, text, variable, colour = (255, 255, 255)):
-        text, rect = self.font.render(f"{text} {variable}",  (255, 255, 255))
-        self.screen.blit(text, (x, y))
+    def draw_text(self, x, y, text, variable, colour = (255, 255, 255), place = "centre"):
+        text = self.font.render(f"{text} {variable}",  True, colour)
+        if place == "centre": rect = text.get_rect(center = (x,y))
+        elif place == "left": rect = text.get_rect(midleft = (x,y))
+        self.screen.blit(text, rect)
 
     def draw_simulation(self):
         self.screen.fill("#131729")
@@ -211,7 +250,7 @@ class Simulation:
         if self.toggle_grid:
             self.display_grid()
         
-        mouse_pos = pyautogui.position()
+        mouse_pos = pygame.mouse.get_pos()
 
         for event in self.events:
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -236,19 +275,19 @@ class Simulation:
             pygame.draw.circle(self.screen, "gold", (person_x, person_y), max(1,person_size*self.zoom*2))
             self.draw_hover_ui(self.selected_person)
         
-        self.draw_text(50, 50, "Speed", self.FPS/60)
-        self.draw_text(50, 100, "Zoom", self.zoom)
-        self.draw_text(50, 150, "Population", len(self.people))
-        self.draw_text(50, 200, "Sources Amount", len(self.sources))
+        self.draw_text(50, 60, "Speed", self.FPS/60, place = "left")
+        self.draw_text(50, 100, "Zoom", self.zoom, place = "left")
+        self.draw_text(50, 140, "Population", len(self.people), place = "left")
+        self.draw_text(50, 180, "Sources Amount", len(self.sources), place = "left")
 
     def draw_hover_ui(self, person):
         person.draw_vision_radius(self)
 
-        self.draw_text(100, 300, "Current activity:", person.current_activity)
-        self.draw_text(100, 350, "Satiety:", person.satiety)
-        self.draw_text(100, 400, "Hydration:", person.hydrated)
-        self.draw_text(100, 450, "Age:", person.age)
-        self.draw_text(100, 500, "Sex:", person.sex)
+        self.draw_text(100, 300, "Current activity:", person.current_activity, place = "left")
+        self.draw_text(100, 340, "Satiety:", person.satiety, place = "left")
+        self.draw_text(100, 380, "Hydration:", person.hydrated, place = "left")
+        self.draw_text(100, 420, "Age:", person.age, place = "left")
+        self.draw_text(100, 460, "Sex:", person.sex, place = "left")
         
         gene_method = Genes.__init__
         gene = inspect.signature(gene_method)
@@ -259,12 +298,62 @@ class Simulation:
                 continue
             text = str(gene)[0].upper() + gene[1:] + ":"
             gene_value = getattr(person.genes, gene)
-            self.draw_text(100, 550+count*50, text, gene_value)
+            self.draw_text(100, 500+count*40, text, gene_value, place = "left")
             count += 1
+
+    def graph_inputs(self):
+        for event in self.events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    if self.selected_graph < len(self.graphs)-1: 
+                        self.selected_graph += 1
+                    else:
+                        self.selected_graph = 0
+                if event.key == pygame.K_LEFT:
+                    if self.selected_graph > 0: 
+                        self.selected_graph -= 1
+                    else:
+                        self.selected_graph = len(self.graphs)-1
+                if event.key == pygame.K_UP:
+                    self.graph_time *= 2
+                if event.key == pygame.K_DOWN:
+                    self.graph_time /= 2
 
     def draw_graphs(self):
         self.screen.fill("#131729")
-        chosen_graph = self.graphs[0]
-        chosen_graph.draw(self)
-        #for graph in self.graphs:
-        #    graph.draw(self)
+        self.draw_grid()
+        self.graphs[self.selected_graph].draw(self)
+
+    def draw_grid(self):
+        for i in range(round(self.graph_x_size/self.graph_grid_size)+1):
+            x = i*self.graph_grid_size + self.x_offset
+            y1 = self.y_offset
+            y2 = self.y_offset + round(self.graph_y_size, -2)
+            pygame.draw.line(self.screen, "#5B6FC7", (x,y1), (x, y2), 1)
+
+        for i in range(round(self.graph_y_size/self.graph_grid_size)+1):
+            y = i*self.graph_grid_size + self.y_offset
+            x1 = self.x_offset
+            x2 = self.x_offset + round(self.graph_x_size, -2)
+            pygame.draw.line(self.screen, "#5B6FC7", (x1,y), (x2, y), 1)
+
+    def draw_graph_ui(self):
+        gene_method = Genes.__init__
+        genes = inspect.signature(gene_method)
+
+        y_size = self.screen_y*0.1*0.25
+        x_size = self.graph_x_size/(len(genes.parameters)-1)
+
+        for i, gene in enumerate(genes.parameters):
+            if gene != "self":
+                x_pos = self.x_offset + (i-1)*x_size
+
+                rect = pygame.Rect(x_pos, y_size , x_size, y_size*2)
+                surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+
+                if gene != self.graphs[self.selected_graph].gene: surface.set_alpha(128)
+
+                pygame.draw.rect(surface, self.gene_dict[gene], surface.get_rect())
+                self.screen.blit(surface, rect)
+
+                self.draw_text(x_pos + 0.5*x_size, y_size*2, gene[0].upper()+gene[1:], "", "#000000")

@@ -18,39 +18,28 @@ class Graph:
         self.values.append(average)
 
     def draw(self,sim):
-        graph_x_size = round(sim.screen_x*0.8,-2)
-        graph_y_size = round(sim.screen_y*0.8,-2)
+        values = self.values[-round(sim.graph_time):]
 
-        x_offset = (sim.screen_x - graph_x_size)/2
-        y_offset = (sim.screen_y - graph_y_size)/2
+        min_value = min(values)-min(values)*0.1 if values else 0
+        max_value = max(values)+max(values)*0.1 if values else 1
 
-        grid_size = 100
-        for i in range(round(graph_x_size/grid_size)+1):
-            x = i*grid_size + x_offset
-            y1 = y_offset
-            y2 = y_offset + round(graph_y_size, -2)
-            pygame.draw.line(sim.screen, (255,255,255), (x,y1), (x, y2), 1)
+        step = len(values)/(sim.graph_x_size)
 
-        for i in range(round(graph_y_size/grid_size)+1):
-            y = i*grid_size + y_offset
-            x1 = x_offset
-            x2 = x_offset + round(graph_x_size, -2)
-            pygame.draw.line(sim.screen, (255,255,255), (x1,y), (x2, y), 1)
-        
-        min_value = min(self.values) if self.values else 0
-        max_value = max(self.values) if self.values else 1
-        step = len(self.values)/(graph_x_size)
         difference = (max_value-min_value)
-        if difference == 0: difference = 1
-        if len(self.values) > graph_x_size:
-            points = [(i+x_offset, (graph_y_size + y_offset - graph_y_size*(self.values[int(i*step)]-min_value)/difference))
-                    for i in range(0, round(graph_x_size))]
+        if len(values) > sim.graph_x_size:
+            points = [(i+sim.x_offset, (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i*step)]-min_value)/difference))
+                    for i in range(0, round(sim.graph_x_size))]
         else:
-            points = [(i+x_offset, (graph_y_size + y_offset - graph_y_size*(self.values[int(i*step)]-min_value)/difference))
-                    for i in range(0, len(self.values))]
+            points = [(i+sim.x_offset, (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i)]-min_value)/difference))
+                    for i in range(0, len(values))]
 
-        try:pygame.draw.lines(sim.screen, self.colour, 0, points, 2)
-        except:pass
+        if len(points) > 2: pygame.draw.lines(sim.screen, self.colour, 0, points, 4)
 
-        sim.draw_text(x_offset-50, y_offset, max_value, "")
-        sim.draw_text(x_offset-50, y_offset+graph_y_size, min_value, "")
+        display_time = min(len(values), sim.graph_time)
+
+        #draws the text
+        sim.draw_text(sim.x_offset, sim.y_offset+sim.graph_y_size+10, display_time, "ticks ago")
+        sim.draw_text(sim.x_offset+sim.graph_x_size, sim.y_offset+sim.graph_y_size+10, 0, "ticks ago")
+
+        sim.draw_text(sim.x_offset-50, sim.y_offset, round(max_value,2), "")
+        sim.draw_text(sim.x_offset-50, sim.y_offset+sim.graph_y_size, round(min_value,2), "")

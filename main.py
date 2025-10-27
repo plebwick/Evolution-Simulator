@@ -1,5 +1,4 @@
 import pygame
-from line_profiler import LineProfiler
 from simulation import Simulation
 
 from random import uniform, randint
@@ -32,13 +31,14 @@ def main():
     #for i in range(1000):
         start_time = time()
         sim.events = pygame.event.get()
+        sim.keys = pygame.key.get_pressed()
+
         for event in sim.events:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
     
         #Key Presses
-        keys = pygame.key.get_pressed()
 
         if current_screen == "start":
             pass
@@ -71,33 +71,7 @@ def main():
                         if sim.toggle_vision_radius: sim.toggle_vision_radius = False
                         else: sim.toggle_vision_radius = True
 
-            #Speed and zoom
-            sim.move_speed = 20/(sim.zoom)
-
-            if keys[pygame.K_w]:
-                sim.camera_y -= sim.move_speed
-            if keys[pygame.K_s]:
-                sim.camera_y += sim.move_speed
-            if keys[pygame.K_a]:
-                sim.camera_x -= sim.move_speed
-            if keys[pygame.K_d]: 
-                sim.camera_x += sim.move_speed
-            if keys[pygame.K_e]:
-                sim.zoom *= (1 + sim.zoom_speed)
-            if keys[pygame.K_q]:
-                sim.zoom /= (1 + sim.zoom_speed)
-            if keys[pygame.K_r]:
-                sim.zoom = 1
-                sim.camera_x = sim.world_x_size/2
-                sim.camera_y = sim.world_y_size/2
-            if keys[pygame.K_LCTRL]:
-                sim.FPS /= (1 + sim.zoom_speed)
-                sim.FPS = max(60, min(12000, sim.FPS))
-            if keys[pygame.K_LSHIFT]:
-                sim.FPS *= (1 + sim.zoom_speed)
-                sim.FPS = max(60, min(12000, sim.FPS))
-            
-            sim.zoom = max(0.05, min(100, sim.zoom))
+            sim.simulation_inputs()
 
             #Main simulation
             if sim.FPS:
@@ -117,11 +91,13 @@ def main():
                 sim.draw_simulation()
                 sim.draw_simulation_ui()
             elif draw == "graph":
+                sim.graph_inputs()
                 sim.draw_graphs()
+                sim.draw_graph_ui()
 
         timer = time()-start_time
 
-        sim.draw_text(10, 10, round(1/timer), "FPS")
+        sim.draw_text(10, 20, round(1/timer), "FPS", place = "left")
 
         if round(1/timer,2) > 60:
             sim.FPS *= (1.005)
