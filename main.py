@@ -27,6 +27,24 @@ def main():
     draw = "sim"
     ##############
 
+    import cProfile, pstats, io
+    pr = cProfile.Profile()
+    pr.enable()
+
+    sim = Simulation()
+    sim.create_people()
+    sim.create_sources()
+    sim.create_graphs()
+
+    for _ in range(200):          # ~3 seconds of simulation
+        sim.update_simulation()
+
+    pr.disable()
+    s = io.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
+    ps.print_stats(20)
+    print(s.getvalue())
+
     while True:
     #for i in range(1000):
         start_time = time()
@@ -80,7 +98,7 @@ def main():
                 previous_time = current_time
 
                 needed += frame_time
-                needed = min(needed,0.05)
+                needed = min(needed,0.0125)
 
                 
                 while needed >= 1/sim.FPS:

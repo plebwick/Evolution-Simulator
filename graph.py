@@ -12,9 +12,14 @@ class Graph:
         self.values = values
 
     def log(self, sim):
-        people_length = len(sim.people)
-        total = sum(getattr(person.genes, self.gene)for person in sim.people)
-        if people_length > 0: average = total/people_length
+        if self.gene == "Population":
+            average = len(sim.people)
+        elif self.gene == "Sources":
+            average = len(sim.sources)
+        else:
+            people_length = len(sim.people)
+            total = sum(getattr(person.genes, self.gene)for person in sim.people)
+            if people_length > 0: average = total/people_length
         self.values.append(average)
 
     def draw(self,sim):
