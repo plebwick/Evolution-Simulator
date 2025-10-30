@@ -3,23 +3,23 @@ import pygame
 class Graph:
     def __init__(self,
                  gene,
+                 value,
                  colour,
                  display,
                  values = []):
         self.gene = gene
+        self.value = value
         self.colour = colour
         self.display = display
         self.values = values
 
     def log(self, sim):
-        if self.gene == "Population":
-            average = len(sim.people)
-        elif self.gene == "Sources":
-            average = len(sim.sources)
-        else:
+        if self.value == "gene":
             people_length = len(sim.people)
             total = sum(getattr(person.genes, self.gene)for person in sim.people)
             if people_length > 0: average = total/people_length
+        else:
+            average = self.value()
         self.values.append(average)
 
     def draw(self,sim):
@@ -31,11 +31,12 @@ class Graph:
         step = len(values)/(sim.graph_x_size)
 
         difference = (max_value-min_value)
+        if difference == 0: difference = 1
         if len(values) > sim.graph_x_size:
             points = [(i+sim.x_offset, (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i*step)]-min_value)/difference))
                     for i in range(0, round(sim.graph_x_size))]
         else:
-            points = [(i+sim.x_offset, (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i)]-min_value)/difference))
+            points = [(i/step+sim.x_offset, (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i)]-min_value)/difference))
                     for i in range(0, len(values))]
 
         if len(points) > 2: pygame.draw.lines(sim.screen, self.colour, 0, points, 4)

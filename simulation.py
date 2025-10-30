@@ -50,8 +50,8 @@ class Simulation:
 
         self.events = None
         self.FPS = 60
-        self.world_x_size = self.screen_x*4
-        self.world_y_size = self.screen_y*4
+        self.world_x_size = self.screen_x*8
+        self.world_y_size = self.screen_y*8
 
         self.font = pygame.font.Font("Pompadour.otf", 24)
 
@@ -72,17 +72,17 @@ class Simulation:
         self.season = None
         self.mutation_rate = 1
 
-        self.starting_population = 400
+        self.starting_population = 5000
 
-        total = 500
-        self.permanent_sources_number = 500
-        self.food_water_size = 20
+        total = 250
+        self.permanent_sources_number = 25
+        self.food_water_size = 1
         self.food_max = total
         self.water_max = total
         self.food_water_chance = 0.5
 
     def create_people(self):
-        """
+        
         self.people = [Person(x = randint(0,self.world_x_size),
                  y = randint(0,self.world_y_size),
                  grid = None,
@@ -92,22 +92,22 @@ class Simulation:
                  alive = True,
                  sex = "male" if uniform(0,1) > 0.5 else "female",
                  genes = Genes(
-                     uniform(2,10),
-                     uniform(0.25,1),
-                     uniform(1.05,1.1),
+                     uniform(0,1),
+                     uniform(0,1),
+                     uniform(0.2,1.2),
                      uniform(0.01,0.1),
-                     uniform(100,400),
+                     uniform(100,1000),
                      uniform(0,pi*2),
                      uniform(0,1),
-                     uniform(10,200),
+                     uniform(0,1),
                      uniform(0,1),
                      uniform(1000,10000)
                  ),
                  age = randint(0,100),
                  postnatal = None,
                  gestational = None,
-                 satiety = 500,
-                 hydrated = 500,
+                 satiety = 0,
+                 hydrated = 0,
                  activity = None,
                  colour = (randint(0,255), randint(0,255), randint(0,255))
                  )
@@ -142,8 +142,8 @@ class Simulation:
                  colour = (randint(0,255), randint(0,255), randint(0,255))
                  )
                  for _ in range(self.starting_population)]
+        """
 
-    
     def create_sources(self):
         for i in range(self.permanent_sources_number):
             x = randint(0,self.world_x_size)
@@ -153,19 +153,28 @@ class Simulation:
             self.permanent_sources.append(p)
         
     def create_graphs(self):
+        #Adds all genes to graphs
         for gene in self.genes.parameters:
             if gene != "self":
                 self.graphs.append(Graph(gene,
+                                   "gene",
                                    self.gene_dict[gene],
                                    False,
                                    []))
-                
+        def people_length():
+            return len(self.people)
+        
         self.graphs.append(Graph("Population",
+                                 people_length,
                                  self.gene_dict["Population"],
                                  False,
                                  []))
         
+        def sources_length():
+            return len(self.sources)
+        
         self.graphs.append(Graph("Sources",
+                                 sources_length,
                                  self.gene_dict["Sources"],
                                  False,
                                  []))
@@ -194,6 +203,19 @@ class Simulation:
                 graph.log(self)
 
     def simulation_inputs(self):
+        for event in self.events:
+            if event.type == pygame.KEYDOWN:
+                #toggle grid
+                if event.key == pygame.K_g:
+                    if self.toggle_grid: self.toggle_grid = False
+                    else: self.toggle_grid = True
+
+                #toggle vision radius
+                if event.key == pygame.K_v:
+                    if self.toggle_vision_radius: self.toggle_vision_radius = False
+                    else: self.toggle_vision_radius = True
+
+
         self.move_speed = 20/(self.zoom)
 
         if self.keys[pygame.K_w]:
@@ -212,12 +234,6 @@ class Simulation:
             self.zoom = 1
             self.camera_x = self.world_x_size/2
             self.camera_y = self.world_y_size/2
-        if self.keys[pygame.K_LCTRL]:
-            self.FPS /= (1 + self.zoom_speed)
-            self.FPS = max(60, min(24000, self.FPS))
-        if self.keys[pygame.K_LSHIFT]:
-            self.FPS *= (1 + self.zoom_speed)
-            self.FPS = max(60, min(24000, self.FPS))
         
         self.zoom = max(0.05, min(100, self.zoom))
     
@@ -333,6 +349,41 @@ class Simulation:
         self.draw_text(100, 500, "Current gestational period:", person.gestational, place = "left")
         self.draw_text(100, 540, "Metabolic rate:", person.metabolic_rate, place = "left")
 
+        ##############################
+        y_size = 20
+        x_size = 150
+
+        rect = pygame.Rect(100, 340-y_size, x_size, y_size*2)
+        surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+
+        pygame.draw.rect(surface, "red", surface.get_rect(), 1)
+        self.screen.blit(surface, rect)
+
+        percent = person.satiety/person.stomach_size
+        rect = pygame.Rect(100, 340-y_size, x_size*percent, y_size*2)
+        surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+
+        pygame.draw.rect(surface, "red", surface.get_rect())
+        self.screen.blit(surface, rect)
+        ################################
+
+        y_size = 20
+        x_size = 150
+
+        rect = pygame.Rect(100, 380-y_size, x_size, y_size*2)
+        surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+
+        pygame.draw.rect(surface, "blue", surface.get_rect(), 1)
+        self.screen.blit(surface, rect)
+
+        percent = person.hydrated/person.bladder_size
+        rect = pygame.Rect(100, 380-y_size, x_size*percent, y_size*2)
+        surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+
+        pygame.draw.rect(surface, "blue", surface.get_rect())
+        self.screen.blit(surface, rect)
+        ####################################
+
         count = 0
         for gene in self.genes.parameters:
             if gene == "self":
@@ -344,7 +395,7 @@ class Simulation:
 
         if isinstance(person.target, Person):
             count = 0
-            for gene in self.gene.parameters:
+            for gene in self.genes.parameters:
                 if gene == "self":
                     continue
                 text = str(gene)[0].upper() + gene[1:] + ":"
@@ -369,6 +420,7 @@ class Simulation:
                     self.graph_time *= 2
                 if event.key == pygame.K_DOWN:
                     self.graph_time /= 2
+                    self.graph_time = max(self.graph_time, 100)
 
     def draw_graphs(self):
         self.screen.fill("#131729")

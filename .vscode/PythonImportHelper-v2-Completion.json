@@ -163,9 +163,10 @@
     },
     {
         "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
         "importPath": "time",
         "description": "time",
-        "isExtraImport": true,
         "detail": "time",
         "documentation": {}
     },
@@ -239,7 +240,7 @@
         "kind": 6,
         "importPath": "graph",
         "description": "graph",
-        "peekOfCode": "class Graph:\n    def __init__(self,\n                 gene,\n                 colour,\n                 display,\n                 values = []):\n        self.gene = gene\n        self.colour = colour\n        self.display = display\n        self.values = values",
+        "peekOfCode": "class Graph:\n    def __init__(self,\n                 gene,\n                 value,\n                 colour,\n                 display,\n                 values = []):\n        self.gene = gene\n        self.value = value\n        self.colour = colour",
         "detail": "graph",
         "documentation": {}
     },
@@ -248,7 +249,7 @@
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def main():\n    pygame.init()\n    clock = pygame.time.Clock()\n    sim = Simulation()\n    screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\n    pygame.display.set_caption(\"Evolution Simulation\")\n    sim.create_people()\n    sim.create_sources()\n    sim.create_graphs()\n    #######temp",
+        "peekOfCode": "def main():\n    pygame.init()\n    clock = pygame.time.Clock()\n    sim = Simulation()\n    screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\n    pygame.display.set_caption(\"Evolution Simulation\")\n    sim.create_people()\n    sim.create_sources()\n    sim.create_graphs()\n    previous_time = time.perf_counter()",
         "detail": "main",
         "documentation": {}
     },

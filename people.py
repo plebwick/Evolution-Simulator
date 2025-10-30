@@ -59,14 +59,17 @@ class Person:
         self.age = age
         self.postnatal = postnatal
         self.gestational = gestational
-        self.satiety = satiety
-        self.hydrated = hydrated
         self.activity = activity
         self.colour = colour
 
-        size = (self.genes.size**2)*pi
-        speed = self.vel**2
-        self.metabolic_rate = 1/2 * size * speed / 2000
+        size = self.genes.size
+        speed = self.vel
+        self.metabolic_rate = ((size/5)**3 * (speed/5)**2 + 0.1) / 432
+        self.stomach_size = size * 10
+        self.bladder_size = size * 10
+
+        self.satiety = self.stomach_size/2
+        self.hydrated = self.bladder_size/2
 
     def draw(self, sim):
         x = sim.normalise_coordinate(self.x, 0)
@@ -108,7 +111,7 @@ class Person:
             elif self.activity == "mate" and self.target.activity != "mate": self.target = None
 
         self.satiety -= self.metabolic_rate
-        self.hydrated -= self.metabolic_rate
+        self.hydrated -= (self.metabolic_rate*3)
         
         if self.satiety < 0 or self.hydrated < 0: 
             self.alive = False
@@ -133,15 +136,11 @@ class Person:
         if self.age % 120 != 0 or self.activity:
             return
 
-        s = self.satiety
-        h = self.hydrated
+        s = self.satiety/self.stomach_size
+        h = self.hydrated/self.bladder_size
 
         if self.gestational: chance_to_mate = 0
-        else:
-            if (e ** -( (1/self.genes.virility) * ((s+h) - 1200))) > 0:
-                chance_to_mate = 1 / (e ** -( (1/self.genes.virility) * ((s+h) - 1200)))
-            else:
-                chance_to_mate = 0
+        else:chance_to_mate = (s/2 + h/2 + self.genes.virility)**8
 
         if chance_to_mate > uniform(0,1): self.activity = "mate"
         else:
@@ -188,27 +187,30 @@ class Person:
         dx = self.target.x - self.x
         dy = self.target.y - self.y
         distance = dx**2 + dy**2
-        if distance < self.genes.size**2:
+        if distance < self.genes.size:
             if self.activity == "food" or self.activity == "water":
                 sim.sources.remove(self.target)
                 sim.grid[self.target.grid].remove(self.target)
 
                 if self.activity == "food": 
                     self.satiety += sim.food_water_size
+                    self.satiety = min(self.satiety, self.stomach_size)
                 else: 
                     self.hydrated += sim.food_water_size
+                    self.hydrated = min(self.hydrated, self.bladder_size)
             elif self.activity == "mate":
-                self.satiety -= 100
-                self.hydrated -= 100
+                self.satiety -= self.stomach_size*0.2
+                self.hydrated -= self.bladder_size*0.2
                 if self.sex == "female":
                     self.gestational = 1
             self.target = None
             self.activity = None
 
     def gestation(self,sim):
-        self.gestational += 1
         if self.gestational > self.genes.gestation:
             self.reproduce(sim)
+        else:
+            self.gestational += 1
 
     def reproduce(self,sim):
         self.gestational = None
@@ -223,10 +225,12 @@ class Person:
         new_virility = self.genes.virility + uniform(-self.genes.virility*0.1,self.genes.virility*0.1)
         new_male_chance = self.genes.male_chance + uniform(-self.genes.male_chance*0.1,self.genes.male_chance*0.1)
         new_gestation = self.genes.gestation + uniform(-self.genes.gestation*0.1,self.genes.gestation*0.1)
+        
+        new_size = max(1, new_size)
 
         male_chance = (self.genes.male_chance + self.mate.genes.male_chance)
-        satiety = self.satiety
-        hydration = self.hydrated
+        satiety = self.satiety*0.25
+        hydration = self.hydrated*0.25
 
         sim.people.append(Person(x = self.x,
                  y = self.y,
@@ -251,12 +255,15 @@ class Person:
                  age = randint(0,100),
                  postnatal = None,
                  gestational = None,
-                 satiety = satiety/2,
-                 hydrated = hydration/2,
+                 satiety = satiety,
+                 hydrated = hydration,
                  activity = None,
                  colour = self.colour
                  )
         )
+
+        self.satiety *= 0.70
+        self.hydrated *= 0.70
 
     def angle_wander(self, sim):
         self.dir += uniform(-self.genes.wander_agility,self.genes.wander_agility)
