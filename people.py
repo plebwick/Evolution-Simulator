@@ -64,9 +64,9 @@ class Person:
 
         size = self.genes.size
         speed = self.vel
-        self.metabolic_rate = ((size/5)**3 * (speed/5)**2 + 0.1) / 432
-        self.stomach_size = size * 10
-        self.bladder_size = size * 10
+        self.metabolic_rate = 0.0001 #((size/5)**2 * (speed/5)**2 + 0.1) / 432 / 5
+        self.stomach_size = size*5
+        self.bladder_size = size*5
 
         self.satiety = self.stomach_size/2
         self.hydrated = self.bladder_size/2
@@ -112,6 +112,10 @@ class Person:
 
         self.satiety -= self.metabolic_rate
         self.hydrated -= (self.metabolic_rate*3)
+
+        if self.gestation:
+            self.satiety -= self.metabolic_rate * 0.25
+            self.hydrated -= self.metabolic_rate * 0.25
         
         if self.satiety < 0 or self.hydrated < 0: 
             self.alive = False
@@ -133,13 +137,18 @@ class Person:
         self.move(sim)
 
     def decide_current_action(self, sim):
-        if self.age % 120 != 0 or self.activity:
+        if self.age % 120 != 0:
             return
 
         s = self.satiety/self.stomach_size
         h = self.hydrated/self.bladder_size
 
         if self.gestational: chance_to_mate = 0
+        elif self.postnatal: 
+            if self.postnatal < 10000: 
+                chance_to_mate = 0
+            else:
+                chance_to_mate = (s/2 + h/2 + self.genes.virility)**8
         else:chance_to_mate = (s/2 + h/2 + self.genes.virility)**8
 
         if chance_to_mate > uniform(0,1): self.activity = "mate"
@@ -199,8 +208,8 @@ class Person:
                     self.hydrated += sim.food_water_size
                     self.hydrated = min(self.hydrated, self.bladder_size)
             elif self.activity == "mate":
-                self.satiety -= self.stomach_size*0.2
-                self.hydrated -= self.bladder_size*0.2
+                self.satiety -= self.stomach_size*0.1
+                self.hydrated -= self.bladder_size*0.1
                 if self.sex == "female":
                     self.gestational = 1
             self.target = None
@@ -214,6 +223,7 @@ class Person:
 
     def reproduce(self,sim):
         self.gestational = None
+        self.postnatal = 1
 
         new_size = self.genes.size + uniform(-self.genes.size*0.1,self.genes.size*0.1)
         new_speed = self.genes.speed + uniform(-self.genes.speed*0.1,self.genes.speed*0.1)
@@ -225,8 +235,6 @@ class Person:
         new_virility = self.genes.virility + uniform(-self.genes.virility*0.1,self.genes.virility*0.1)
         new_male_chance = self.genes.male_chance + uniform(-self.genes.male_chance*0.1,self.genes.male_chance*0.1)
         new_gestation = self.genes.gestation + uniform(-self.genes.gestation*0.1,self.genes.gestation*0.1)
-        
-        new_size = max(1, new_size)
 
         male_chance = (self.genes.male_chance + self.mate.genes.male_chance)
         satiety = self.satiety*0.25

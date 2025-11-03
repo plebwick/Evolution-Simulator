@@ -13,10 +13,10 @@ class Source:
         self.type = type
 
     def respawn(sim):
-        if sim.season == "Spring": season_frequency = 6
-        if sim.season == "Summer": season_frequency = 4
-        if sim.season == "Autumn": season_frequency = 6
-        if sim.season == "Winter": season_frequency = 8
+        if sim.season == "Spring": season_frequency = 1
+        if sim.season == "Summer": season_frequency = 1
+        if sim.season == "Autumn": season_frequency = 1
+        if sim.season == "Winter": season_frequency = 1
         if sim.day % season_frequency == 0:
             if len(sim.sources) < (sim.food_max + sim.water_max):
                 food = [source for source in sim.sources if source.type == "food"]

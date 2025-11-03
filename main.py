@@ -93,7 +93,7 @@ def main():
 
         sim.draw_text(10, 20, round(1/FPS_time), "FPS", place = "left")
 
-        if False:
+        if True:
             if round(1/FPS_time,2) > 60:
                 sim.FPS *= (1.005)
             elif round(1/FPS_time,2) < 60:

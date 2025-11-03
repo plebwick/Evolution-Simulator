@@ -50,14 +50,14 @@ class Simulation:
 
         self.events = None
         self.FPS = 60
-        self.world_x_size = self.screen_x*8
-        self.world_y_size = self.screen_y*8
+        self.world_x_size = self.screen_x*16
+        self.world_y_size = self.screen_y*16
 
         self.font = pygame.font.Font("Pompadour.otf", 24)
 
         self.camera_x = self.world_x_size/2
         self.camera_y = self.world_y_size/2
-        self.zoom = 0.25
+        self.zoom =  self.screen_x/self.world_x_size
         self.move_speed = 20/(self.zoom)
         self.zoom_speed = 0.05
         self.selected_person = None
@@ -72,11 +72,11 @@ class Simulation:
         self.season = None
         self.mutation_rate = 1
 
-        self.starting_population = 5000
+        self.starting_population = 500
 
-        total = 250
-        self.permanent_sources_number = 25
-        self.food_water_size = 1
+        total = 750
+        self.permanent_sources_number = 100
+        self.food_water_size = 0.5
         self.food_max = total
         self.water_max = total
         self.food_water_chance = 0.5
@@ -94,12 +94,12 @@ class Simulation:
                  genes = Genes(
                      uniform(0,1),
                      uniform(0,1),
-                     uniform(0.2,1.2),
+                     uniform(0,0.25),
                      uniform(0.01,0.1),
                      uniform(100,1000),
                      uniform(0,pi*2),
                      uniform(0,1),
-                     uniform(0,1),
+                     uniform(0,0.2),
                      uniform(0,1),
                      uniform(1000,10000)
                  ),
@@ -251,6 +251,7 @@ class Simulation:
         for person in dead_people:
             if self.selected_person == person:
                 self.selected_person = None
+            self.grid[person.grid].remove(person)
         self.people = [person for person in self.people if person not in dead_people]
 
     def check_grid(self, person):
@@ -326,11 +327,19 @@ class Simulation:
                         self.selected_person = person
 
         if self.selected_person: 
-            person_size = self.selected_person.genes.size
+            person_size = self.selected_person.genes.size*4
             person_x = self.normalise_coordinate(self.selected_person.x, 0)
             person_y = self.normalise_coordinate(self.selected_person.y, 1)
-            pygame.draw.circle(self.screen, "gold", (person_x, person_y), max(1,person_size*self.zoom*2))
+            pygame.draw.circle(self.screen, "gold", (person_x, person_y), max(1,person_size*self.zoom))
             self.draw_hover_ui(self.selected_person)
+
+            if self.selected_person.target:
+                person_size = self.selected_person.genes.size
+                person_x = self.normalise_coordinate(self.selected_person.target.x, 0)
+                person_y = self.normalise_coordinate(self.selected_person.target.y, 1)
+                pygame.draw.circle(self.screen, "orange", (person_x, person_y), max(1,person_size*self.zoom))
+                self.draw_hover_ui(self.selected_person)
+
         
         self.draw_text(50, 220, "Season", self.season, (255,255,255), "left")
         self.draw_text(50, 60, "Speed", self.FPS/60, place = "left")
