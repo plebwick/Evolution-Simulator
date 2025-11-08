@@ -162,6 +162,22 @@
         "documentation": {}
     },
     {
+        "label": "cos",
+        "importPath": "math",
+        "description": "math",
+        "isExtraImport": true,
+        "detail": "math",
+        "documentation": {}
+    },
+    {
+        "label": "sin",
+        "importPath": "math",
+        "description": "math",
+        "isExtraImport": true,
+        "detail": "math",
+        "documentation": {}
+    },
+    {
         "label": "time",
         "kind": 6,
         "isExtraImport": true,

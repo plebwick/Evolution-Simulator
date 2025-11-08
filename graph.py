@@ -18,6 +18,7 @@ class Graph:
             people_length = len(sim.people)
             total = sum(getattr(person.genes, self.gene)for person in sim.people)
             if people_length > 0: average = total/people_length
+            else:average = 0
         else:
             average = self.value()
         self.values.append(average)
@@ -39,13 +40,20 @@ class Graph:
             points = [(i/step+sim.x_offset, (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i)]-min_value)/difference))
                     for i in range(0, len(values))]
 
-        if len(points) > 2: pygame.draw.lines(sim.screen, self.colour, 0, points, 4)
+        if len(points) > 2: 
+            pygame.draw.lines(sim.screen, self.colour, 0, points, 4)
+            last_value_y = sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[(len(self.values))-1]-min_value)/difference
+            last_value = values[(len(self.values))-1]
+        else:
+            last_value_y = 0
+            last_value = 0
 
         display_time = min(len(values), sim.graph_time)
 
         #draws the text
-        sim.draw_text(sim.x_offset, sim.y_offset+sim.graph_y_size+10, display_time, "ticks ago")
-        sim.draw_text(sim.x_offset+sim.graph_x_size, sim.y_offset+sim.graph_y_size+10, 0, "ticks ago")
+        sim.draw_text(sim.x_offset, sim.y_offset+sim.graph_y_size+20, f"{display_time} ticks ago", place = "left")
+        sim.draw_text(sim.x_offset+sim.graph_x_size, sim.y_offset+sim.graph_y_size+20, "0 ticks ago", place = "left")
 
-        sim.draw_text(sim.x_offset-50, sim.y_offset, round(max_value,2), "")
-        sim.draw_text(sim.x_offset-50, sim.y_offset+sim.graph_y_size, round(min_value,2), "")
+        sim.draw_text(sim.x_offset-50, sim.y_offset, round(max_value,2), place = "left")
+        sim.draw_text(sim.x_offset-50, sim.y_offset+sim.graph_y_size, round(min_value,2), place = "left")
+        sim.draw_text(sim.x_offset+sim.graph_x_size+15, last_value_y, round(last_value,2), place = "left")

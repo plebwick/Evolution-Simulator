@@ -1,6 +1,6 @@
 import pygame, inspect
 from random import randint, uniform
-from math import pi, ceil
+from math import pi, ceil, cos, sin
 from sources import Source
 from graph import Graph
 from people import Person
@@ -50,8 +50,8 @@ class Simulation:
 
         self.events = None
         self.FPS = 60
-        self.world_x_size = self.screen_x*16
-        self.world_y_size = self.screen_y*16
+        self.world_x_size = self.screen_x*12
+        self.world_y_size = self.screen_y*12
 
         self.font = pygame.font.Font("Pompadour.otf", 24)
 
@@ -74,9 +74,9 @@ class Simulation:
 
         self.starting_population = 500
 
-        total = 750
+        total = 250
         self.permanent_sources_number = 100
-        self.food_water_size = 0.5
+        self.food_water_size = 1
         self.food_max = total
         self.water_max = total
         self.food_water_chance = 0.5
@@ -94,7 +94,7 @@ class Simulation:
                  genes = Genes(
                      uniform(0,1),
                      uniform(0,1),
-                     uniform(0,0.25),
+                     uniform(0,0.025),
                      uniform(0.01,0.1),
                      uniform(100,1000),
                      uniform(0,pi*2),
@@ -286,11 +286,18 @@ class Simulation:
             x2 = (self.world_x_size - self.camera_x) * self.zoom + self.screen_x/2
             pygame.draw.line(self.screen, (255,255,255), (x1,y), (x2, y), 1)
 
-    def draw_text(self, x, y, text, variable, colour = (255, 255, 255), place = "centre"):
-        text = self.font.render(f"{text} {variable}",  True, colour)
+    def draw_text(self, x, y, text, colour = (255, 255, 255), place = "centre"):
+        text = self.font.render(f"{text}",  True, colour)
         if place == "centre": rect = text.get_rect(center = (x,y))
         elif place == "left": rect = text.get_rect(midleft = (x,y))
         self.screen.blit(text, rect)
+
+    def draw_box(self, x, y, x_size, y_size, colour, alpha = 255, border_size = 0):
+        rect = pygame.Rect(x, y, x_size, y_size)
+        surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+        surface.set_alpha(alpha)
+        pygame.draw.rect(surface, colour, surface.get_rect(), border_size)
+        self.screen.blit(surface, rect)
 
     def draw_simulation(self):
         self.screen.fill("#131729")
@@ -338,79 +345,81 @@ class Simulation:
                 person_x = self.normalise_coordinate(self.selected_person.target.x, 0)
                 person_y = self.normalise_coordinate(self.selected_person.target.y, 1)
                 pygame.draw.circle(self.screen, "orange", (person_x, person_y), max(1,person_size*self.zoom))
-                self.draw_hover_ui(self.selected_person)
 
         
-        self.draw_text(50, 220, "Season", self.season, (255,255,255), "left")
-        self.draw_text(50, 60, "Speed", self.FPS/60, place = "left")
-        self.draw_text(50, 100, "Zoom", self.zoom, place = "left")
-        self.draw_text(50, 140, "Population", len(self.people), place = "left")
-        self.draw_text(50, 180, "Sources Amount", len(self.sources), place = "left")
+        self.draw_text(50, 220, f"Season {self.season}", (255,255,255), "left")
+        self.draw_text(50, 60, f"Speed {self.FPS/60}", place = "left")
+        self.draw_text(50, 100, f"Zoom {self.zoom}", place = "left")
+        self.draw_text(50, 140, f"Population {len(self.people)}", place = "left")
+        self.draw_text(50, 180, f"Sources Amount {len(self.sources)}", place = "left")
 
     def draw_hover_ui(self, person):
         person.draw_vision_radius(self)
 
-        self.draw_text(100, 300, "Current activity:", person.activity, place = "left")
-        self.draw_text(100, 340, "Satiety:", person.satiety, place = "left")
-        self.draw_text(100, 380, "Hydration:", person.hydrated, place = "left")
-        self.draw_text(100, 420, "Age:", person.age, place = "left")
-        self.draw_text(100, 460, "Sex:", person.sex, place = "left")
-        self.draw_text(100, 500, "Current gestational period:", person.gestational, place = "left")
-        self.draw_text(100, 540, "Metabolic rate:", person.metabolic_rate, place = "left")
+        left = self.screen_x*0.020
 
-        ##############################
-        y_size = 20
-        x_size = 150
+        #background box
+        self.draw_box(left, 270, 400, 800, "#1C0C63")
 
-        rect = pygame.Rect(100, 340-y_size, x_size, y_size*2)
-        surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+        self.draw_box(left, 270, 400, 800, "#160A4B", border_size=3)
+        
+        #draw changing variables
+        self.draw_text(left+20, 300, f"Activity: {person.activity}", place = "left")
+        self.draw_text(left+20, 330, f"Age: {person.age}", place = "left")
+        self.draw_text(left+20, 360, f"Gestational period: {person.gestational}", place = "left")
 
-        pygame.draw.rect(surface, "red", surface.get_rect(), 1)
-        self.screen.blit(surface, rect)
+        #draw person
+        x1 = left + 200
+        y1 = 430
+        size = 38
+        colour = (255,255,255)
+        if person.activity == "mate": 
+            if person.target: colour = (255,255,255)
+            else: colour = (128,128,128)
+        elif person.target: colour = (0,0,255) if person.target.type == "water" else (255,0,0)
+        else: colour = (255,128,128) if person.activity == "food" else (128,128,255)
 
+        pygame.draw.circle(self.screen, colour, (x1, y1), max(1,size))
+
+        x, y = x1 + cos(person.dir+0.45) * 25, y1 + sin(person.dir+0.45) * 25
+        pygame.draw.circle(self.screen, "white", (x, y), max(1,7))
+        x, y = x1 + cos(person.dir-0.45) * 25, y1 + sin(person.dir-0.45) * 25
+        pygame.draw.circle(self.screen, "white", (x, y), max(1,7))
+
+        x, y = x1 + cos(person.dir+0.45) * 26, y1 + sin(person.dir+0.45) * 26
+        pygame.draw.circle(self.screen, "black", (x, y), max(1,4))
+        x, y = x1 + cos(person.dir-0.45) * 26, y1 + sin(person.dir-0.45) * 26
+        pygame.draw.circle(self.screen, "black", (x, y), max(1,4))
+
+        #draw food and water boxes
+        y_size = 18
+        x_size = 220
+
+        self.draw_box(left + 120, 520-y_size, x_size, y_size*2, "#FF0000", border_size = 1)
         percent = person.satiety/person.stomach_size
-        rect = pygame.Rect(100, 340-y_size, x_size*percent, y_size*2)
-        surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+        self.draw_box(left + 120, 520-y_size, x_size*percent, y_size*2, "#FF0000")
 
-        pygame.draw.rect(surface, "red", surface.get_rect())
-        self.screen.blit(surface, rect)
-        ################################
+        self.draw_text(left+20, 520, f"Food: ", place = "left")
 
-        y_size = 20
-        x_size = 150
-
-        rect = pygame.Rect(100, 380-y_size, x_size, y_size*2)
-        surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
-
-        pygame.draw.rect(surface, "blue", surface.get_rect(), 1)
-        self.screen.blit(surface, rect)
-
+        self.draw_box(left + 120, 560-y_size, x_size, y_size*2, "#0000FF", border_size = 1)
         percent = person.hydrated/person.bladder_size
-        rect = pygame.Rect(100, 380-y_size, x_size*percent, y_size*2)
-        surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+        self.draw_box(left + 120, 560-y_size, x_size*percent, y_size*2, "#0000FF")
 
-        pygame.draw.rect(surface, "blue", surface.get_rect())
-        self.screen.blit(surface, rect)
-        ####################################
+        self.draw_text(left+20, 560, f"Water: ", place = "left")
 
+        #draw static variables
+        self.draw_text(left+20, 610, f"Sex: {person.sex}", place = "left")
+        self.draw_text(left+20, 640, f"Metabolic rate: {person.metabolic_rate}", place = "left")
+
+        #draw genes
         count = 0
         for gene in self.genes.parameters:
             if gene == "self":
                 continue
             text = str(gene)[0].upper() + gene[1:] + ":"
             gene_value = getattr(person.genes, gene)
-            self.draw_text(100, 580+count*40, text, gene_value, place = "left")
+            self.draw_text(left+20, 670+count*30, f"{text} {round(gene_value,2)}", place = "left")
             count += 1
-
-        if isinstance(person.target, Person):
-            count = 0
-            for gene in self.genes.parameters:
-                if gene == "self":
-                    continue
-                text = str(gene)[0].upper() + gene[1:] + ":"
-                gene_value = getattr(person.target.genes, gene)
-                self.draw_text(700, 500+count*40, text, gene_value, place = "left")
-                count += 1
 
     def graph_inputs(self):
         for event in self.events:
@@ -464,4 +473,4 @@ class Simulation:
             pygame.draw.rect(surface, self.gene_dict[graph.gene], surface.get_rect())
             self.screen.blit(surface, rect)
 
-            self.draw_text(x_pos + 0.5*x_size, y_size*2, graph.gene[0].upper()+graph.gene[1:], "", "#000000")
+            self.draw_text(x_pos + 0.5*x_size, y_size*2, f"{graph.gene[0].upper()} {graph.gene[1:]}", "#000000")

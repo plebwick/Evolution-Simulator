@@ -64,7 +64,7 @@ class Person:
 
         size = self.genes.size
         speed = self.vel
-        self.metabolic_rate = 0.0001 #((size/5)**2 * (speed/5)**2 + 0.1) / 432 / 5
+        self.metabolic_rate = 0.00005 #((size/5)**2 * (speed/5)**2 + 0.1) / 432 / 5
         self.stomach_size = size*5
         self.bladder_size = size*5
 
@@ -157,6 +157,11 @@ class Person:
             if food_water_chance > uniform(0,1): self.activity = "food"
             else: self.activity = "water"
 
+            if self.satiety > self.hydrated:
+                self.activity = "water"
+            else:
+                self.activity = "food"
+
     def scan(self, sim):
         if self.age % 60 != 0 and self.target != "mate": return
         
@@ -208,8 +213,10 @@ class Person:
                     self.hydrated += sim.food_water_size
                     self.hydrated = min(self.hydrated, self.bladder_size)
             elif self.activity == "mate":
-                self.satiety -= self.stomach_size*0.1
-                self.hydrated -= self.bladder_size*0.1
+                #self.satiety -= self.stomach_size*0.1
+                #self.hydrated -= self.bladder_size*0.1
+                self.satiety -= 1
+                self.hydrated -= 1
                 if self.sex == "female":
                     self.gestational = 1
             self.target = None

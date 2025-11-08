@@ -91,9 +91,9 @@ def main():
 
         FPS_time = time.perf_counter()-FPS_time
 
-        sim.draw_text(10, 20, round(1/FPS_time), "FPS", place = "left")
+        sim.draw_text(10, 20, f"{round(1/FPS_time)} FPS", place = "left")
 
-        if True:
+        if False:
             if round(1/FPS_time,2) > 60:
                 sim.FPS *= (1.005)
             elif round(1/FPS_time,2) < 60:
