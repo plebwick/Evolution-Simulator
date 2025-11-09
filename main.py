@@ -60,7 +60,7 @@ def main():
 
             if sim.keys[pygame.K_LCTRL]:
                 sim.FPS /= (1 + sim.zoom_speed)
-                sim.FPS = max(60, min(60000, sim.FPS))
+                sim.FPS = max(60, min(60000, sim.FPS)) 
             if sim.keys[pygame.K_LSHIFT]:
                 sim.FPS *= (1 + sim.zoom_speed)
                 sim.FPS = max(60, min(60000, sim.FPS))

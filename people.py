@@ -50,7 +50,7 @@ class Person:
         self.y = y
         self.grid = grid
         self.dir = direction
-        self.vel = genes.speed
+        self.vel = min(genes.speed, genes.size)
         self.target = target
         self.mate = mate
         self.alive = alive
@@ -62,29 +62,47 @@ class Person:
         self.activity = activity
         self.colour = colour
 
-        size = self.genes.size
-        speed = self.vel
-        self.metabolic_rate = 0.00005 #((size/5)**2 * (speed/5)**2 + 0.1) / 432 / 5
-        self.stomach_size = size*5
-        self.bladder_size = size*5
+        self.size           = self.genes.size
+        self.speed          = self.genes.speed
+        self.agility        = self.genes.agility        / 2*pi
+        self.wander_agility = self.genes.wander_agility
+        self.vision_range   = self.genes.vision_range   / 1000
+        self.vision_angle   = self.genes.vision_angle   / 2*pi
+        self.fertility      = self.genes.fertility
+        self.virility       = self.genes.virility
+        self.male_chance    = self.genes.male_chance
+        self.gestation_     = self.genes.gestation      / 1000
 
-        self.satiety = self.stomach_size/2
-        self.hydrated = self.bladder_size/2
+        number = 5
+        size_factor = self.size/number
+        speed_factor = self.speed/number
+        vision_range_factor = self.vision_range/number
+        vision_angle_factor = self.vision_angle/number
+        agility_factor = self.agility/number
+
+        scale = 100000
+        self.metabolic_rate = 1/(scale*2) + (size_factor + speed_factor + vision_range_factor + vision_angle_factor + agility_factor)/(number*(scale/2))#((size/5)**2 * (speed/5)**2 * 0.1) / 432 / 5
+        self.stomach_size = self.size*2
+        self.bladder_size = self.size*2
+
+        self.satiety = self.stomach_size/5
+        self.hydrated = self.bladder_size/5
 
     def draw(self, sim):
         x = sim.normalise_coordinate(self.x, 0)
         y = sim.normalise_coordinate(self.y, 1)
-        size = self.genes.size
+        if 0 < x < sim.screen_x and 0 < y < sim.screen_y:
+            size = self.genes.size*3
 
-        colour = (255,255,255)
-        if self.activity == "mate": 
-            if self.target: colour = (255,255,255)
-            else: colour = (128,128,128)
-        elif self.target: colour = (0,0,255) if self.target.type == "water" else (255,0,0)
-        else: colour = (255,128,128) if self.activity == "food" else (128,128,255)
-        colour = (255,255,255)
+            colour = (255,255,255)
+            if self.activity == "mate": 
+                if self.target: colour = (255,255,255)
+                else: colour = (128,128,128)
+            elif self.target: colour = (0,0,255) if self.target.type == "water" else (255,0,0)
+            else: colour = (255,128,128) if self.activity == "food" else (128,128,255)
+            colour = (255,255,255)
 
-        pygame.draw.circle(sim.screen, self.colour, (x, y), max(1,size*sim.zoom))
+            pygame.draw.circle(sim.screen, self.colour, (x, y), max(1,size*sim.zoom))
 
     def draw_vision_radius(self,sim):
         x = sim.normalise_coordinate(self.x, 0)
@@ -215,8 +233,8 @@ class Person:
             elif self.activity == "mate":
                 #self.satiety -= self.stomach_size*0.1
                 #self.hydrated -= self.bladder_size*0.1
-                self.satiety -= 1
-                self.hydrated -= 1
+                #self.satiety -= self.metabolic_rate*1000
+                #self.hydrated -= self.metabolic_rate*1000
                 if self.sex == "female":
                     self.gestational = 1
             self.target = None
@@ -244,8 +262,8 @@ class Person:
         new_gestation = self.genes.gestation + uniform(-self.genes.gestation*0.1,self.genes.gestation*0.1)
 
         male_chance = (self.genes.male_chance + self.mate.genes.male_chance)
-        satiety = self.satiety*0.25
-        hydration = self.hydrated*0.25
+        satiety = self.satiety*0.20
+        hydration = self.hydrated*0.20
 
         sim.people.append(Person(x = self.x,
                  y = self.y,
@@ -254,7 +272,7 @@ class Person:
                  target = None,
                  mate = None,
                  alive = True,
-                 sex = "male" if uniform(0,1) > male_chance else "female",
+                 sex = "male" if uniform(0,1) < male_chance else "female",
                  genes = Genes(
                      new_size,
                      new_speed,
@@ -277,8 +295,8 @@ class Person:
                  )
         )
 
-        self.satiety *= 0.70
-        self.hydrated *= 0.70
+        self.satiety *= 0.75
+        self.hydrated *= 0.75
 
     def angle_wander(self, sim):
         self.dir += uniform(-self.genes.wander_agility,self.genes.wander_agility)

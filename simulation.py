@@ -26,14 +26,15 @@ class Simulation:
             "male_chance":"#FF00AA",
             "gestation":"#FFAE51",
             "Population":"#6DFFFF",
-            "Sources":"#FFFFFF"
+            "Sources":"#FFFFFF",
+            "Male/Female":"#FF008C"
         }
 
         self.gene_method = Genes.__init__
         self.genes = inspect.signature(self.gene_method)
 
-        self.screen_x = 2560
-        self.screen_y = 1440
+        self.screen_x = 1920
+        self.screen_y = 1080
 
         self.graphs = []
         self.selected_graph = 0
@@ -50,8 +51,8 @@ class Simulation:
 
         self.events = None
         self.FPS = 60
-        self.world_x_size = self.screen_x*12
-        self.world_y_size = self.screen_y*12
+        self.world_x_size = self.screen_x*6
+        self.world_y_size = self.screen_y*6
 
         self.font = pygame.font.Font("Pompadour.otf", 24)
 
@@ -72,11 +73,11 @@ class Simulation:
         self.season = None
         self.mutation_rate = 1
 
-        self.starting_population = 500
+        self.starting_population = 100
 
-        total = 250
+        total = 500
         self.permanent_sources_number = 100
-        self.food_water_size = 1
+        self.food_water_size = 0.2
         self.food_max = total
         self.water_max = total
         self.food_water_chance = 0.5
@@ -92,16 +93,16 @@ class Simulation:
                  alive = True,
                  sex = "male" if uniform(0,1) > 0.5 else "female",
                  genes = Genes(
-                     uniform(0,1),
-                     uniform(0,1),
-                     uniform(0,0.025),
-                     uniform(0.01,0.1),
-                     uniform(100,1000),
-                     uniform(0,pi*2),
-                     uniform(0,1),
-                     uniform(0,0.2),
-                     uniform(0,1),
-                     uniform(1000,10000)
+                     size =           uniform(0.1,1) ,
+                     speed =          uniform(0.1,1) ,
+                     agility =        uniform(0.1,1) * 2*pi,
+                     wander_agility = uniform(0,0.2) ,
+                     vision_range =   uniform(0.1,1) * 1000,
+                     vision_angle =   uniform(0.1,1) * 2*pi,
+                     fertility =      uniform(0.1,1) ,
+                     virility =       uniform(0.1,1) ,
+                     male_chance =    uniform(0.1,1) ,
+                     gestation =      uniform(0.1,1) * 1000
                  ),
                  age = randint(0,100),
                  postnatal = None,
@@ -152,6 +153,10 @@ class Simulation:
             p = (x,y,type)
             self.permanent_sources.append(p)
         
+        self.season = "Spring"
+        for i in range(5000):
+            Source.respawn(self)
+            self.day+=1
     def create_graphs(self):
         #Adds all genes to graphs
         for gene in self.genes.parameters:
@@ -160,6 +165,9 @@ class Simulation:
                                    "gene",
                                    self.gene_dict[gene],
                                    False,
+                                   [],
+                                   [],
+                                   [],
                                    []))
         def people_length():
             return len(self.people)
@@ -176,6 +184,18 @@ class Simulation:
         self.graphs.append(Graph("Sources",
                                  sources_length,
                                  self.gene_dict["Sources"],
+                                 False,
+                                 []))
+        
+        def male_female_ratio():
+            if len(self.people) > 0:
+                return len([person for person in self.people if person.sex == "male"])/len(self.people)
+            else:
+                return 0
+        
+        self.graphs.append(Graph("Male/Female",
+                                 male_female_ratio,
+                                 self.gene_dict["Male/Female"],
                                  False,
                                  []))
  
@@ -250,8 +270,14 @@ class Simulation:
         dead_people = [person for person in self.people if not person.alive]
         for person in dead_people:
             if self.selected_person == person:
-                self.selected_person = None
-            self.grid[person.grid].remove(person)
+                if len(self.people) > 0:
+                    self.selected_person = self.people[self.people.index(self.selected_person)-1]
+                else:
+                    self.selected_person = None
+            try:
+                self.grid[person.grid].remove(person)
+            except:
+                pass
         self.people = [person for person in self.people if person not in dead_people]
 
     def check_grid(self, person):
@@ -348,8 +374,8 @@ class Simulation:
 
         
         self.draw_text(50, 220, f"Season {self.season}", (255,255,255), "left")
-        self.draw_text(50, 60, f"Speed {self.FPS/60}", place = "left")
-        self.draw_text(50, 100, f"Zoom {self.zoom}", place = "left")
+        self.draw_text(50, 60, f"Speed {round(self.FPS/60)}", place = "left")
+        self.draw_text(50, 100, f"Zoom {round(self.zoom)}", place = "left")
         self.draw_text(50, 140, f"Population {len(self.people)}", place = "left")
         self.draw_text(50, 180, f"Sources Amount {len(self.sources)}", place = "left")
 
@@ -397,19 +423,21 @@ class Simulation:
 
         self.draw_box(left + 120, 520-y_size, x_size, y_size*2, "#FF0000", border_size = 1)
         percent = person.satiety/person.stomach_size
-        self.draw_box(left + 120, 520-y_size, x_size*percent, y_size*2, "#FF0000")
+        if percent >= 0:
+            self.draw_box(left + 120, 520-y_size, x_size*percent, y_size*2, "#FF0000")
 
         self.draw_text(left+20, 520, f"Food: ", place = "left")
 
         self.draw_box(left + 120, 560-y_size, x_size, y_size*2, "#0000FF", border_size = 1)
         percent = person.hydrated/person.bladder_size
-        self.draw_box(left + 120, 560-y_size, x_size*percent, y_size*2, "#0000FF")
+        if percent >= 0:
+            self.draw_box(left + 120, 560-y_size, x_size*percent, y_size*2, "#0000FF")
 
         self.draw_text(left+20, 560, f"Water: ", place = "left")
 
         #draw static variables
         self.draw_text(left+20, 610, f"Sex: {person.sex}", place = "left")
-        self.draw_text(left+20, 640, f"Metabolic rate: {person.metabolic_rate}", place = "left")
+        self.draw_text(left+20, 640, f"Metabolic rate: {person.metabolic_rate*50000}", place = "left")
 
         #draw genes
         count = 0
@@ -468,9 +496,12 @@ class Simulation:
             rect = pygame.Rect(x_pos, y_size , x_size, y_size*2)
             surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
 
-            if graph != self.graphs[self.selected_graph]: surface.set_alpha(128)
+            if graph != self.graphs[self.selected_graph]: alpha = 64
+            else: alpha = 192
 
+            surface.set_alpha(alpha)
             pygame.draw.rect(surface, self.gene_dict[graph.gene], surface.get_rect())
             self.screen.blit(surface, rect)
 
-            self.draw_text(x_pos + 0.5*x_size, y_size*2, f"{graph.gene[0].upper()} {graph.gene[1:]}", "#000000")
+            if alpha == 192: self.draw_text(x_pos + 0.5*x_size, y_size*2, f"{graph.gene[0].upper()}{graph.gene[1:]}", "#FFFFFF")
+            elif alpha == 64: self.draw_text(x_pos + 0.5*x_size, y_size*2, f"{graph.gene[0].upper()}{graph.gene[1:]}", "#AFAFAF")

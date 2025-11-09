@@ -256,7 +256,16 @@
         "kind": 6,
         "importPath": "graph",
         "description": "graph",
-        "peekOfCode": "class Graph:\n    def __init__(self,\n                 gene,\n                 value,\n                 colour,\n                 display,\n                 values = []):\n        self.gene = gene\n        self.value = value\n        self.colour = colour",
+        "peekOfCode": "class Graph:\n    def __init__(self,\n                 gene,\n                 value,\n                 colour,\n                 display,\n                 averages = [],\n                 medians = [],\n                 maximums = [],\n                 minimums = []):",
+        "detail": "graph",
+        "documentation": {}
+    },
+    {
+        "label": "draw_line",
+        "kind": 2,
+        "importPath": "graph",
+        "description": "graph",
+        "peekOfCode": "def draw_line(self, values, sim):\n    step = len(values)/(sim.graph_x_size)\n    if len(values) > sim.graph_x_size:\n        value_points = [(i+sim.x_offset, (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i*step)]-self.min_value)/self.difference))\n                for i in range(0, round(sim.graph_x_size))]\n    else:\n        value_points = [(i/step+sim.x_offset, (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i)]-self.min_value)/self.difference))\n                for i in range(0, len(values))]\n    for i, point in enumerate(value_points):\n        if point[1] <= sim.y_offset: value_points.remove(value_points[i])",
         "detail": "graph",
         "documentation": {}
     },

@@ -13,10 +13,10 @@ class Source:
         self.type = type
 
     def respawn(sim):
-        if sim.season == "Spring": season_frequency = 1
-        if sim.season == "Summer": season_frequency = 1
-        if sim.season == "Autumn": season_frequency = 1
-        if sim.season == "Winter": season_frequency = 1
+        if sim.season == "Spring": season_frequency = 100
+        if sim.season == "Summer": season_frequency = 75
+        if sim.season == "Autumn": season_frequency = 100
+        if sim.season == "Winter": season_frequency = 150
         if sim.day % season_frequency == 0:
             if len(sim.sources) < (sim.food_max + sim.water_max):
                 food = [source for source in sim.sources if source.type == "food"]
@@ -56,8 +56,10 @@ class Source:
                 sim.grid[grid_location].append(new_source)
 
     def draw(self, sim):
-        source_size = 3
+        source_size = 1
         source_x = sim.normalise_coordinate(self.x, 0)
         source_y = sim.normalise_coordinate(self.y, 1)
-        colour = "#8F2323" if self.type == "food" else "#30B3FF"
-        pygame.draw.circle(sim.screen, colour, (source_x, source_y), max(1,source_size*sim.zoom))
+        if 0 < source_x < sim.screen_x and 0 < source_y < sim.screen_y:
+            source_size = 1
+            colour = "#8F2323" if self.type == "food" else "#30B3FF"
+            pygame.draw.circle(sim.screen, colour, (source_x, source_y), max(1,source_size*sim.zoom))
