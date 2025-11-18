@@ -1,5 +1,6 @@
 from random import randint, uniform
 import pygame
+from math import sin
 
 class Source:
     def __init__(self,
@@ -13,11 +14,16 @@ class Source:
         self.type = type
 
     def respawn(sim):
-        if sim.season == "Spring": season_frequency = 100
-        if sim.season == "Summer": season_frequency = 75
-        if sim.season == "Autumn": season_frequency = 100
-        if sim.season == "Winter": season_frequency = 150
-        if sim.day % season_frequency == 0:
+        #if sim.season == "Spring": season_frequency = 100
+        #if sim.season == "Summer": season_frequency = 75
+        #if sim.season == "Autumn": season_frequency = 100
+        #if sim.season == "Winter": season_frequency = 150
+        #season_frequency = abs(sin(sim.day))
+        season_frequency = 200*sin(1/20000 * sim.day) + 600
+        chance = 0.6/(season_frequency/400)  +  0.375
+        if sim.day < 5000:
+            chance = 100
+        if uniform(0,1) < chance/100:
             if len(sim.sources) < (sim.food_max + sim.water_max):
                 food = [source for source in sim.sources if source.type == "food"]
                 water = [source for source in sim.sources if source.type == "water"]

@@ -73,7 +73,7 @@ class Simulation:
         self.season = None
         self.mutation_rate = 1
 
-        self.starting_population = 100
+        self.starting_population = 500
 
         total = 500
         self.permanent_sources_number = 100
