@@ -261,7 +261,7 @@ class Person:
         new_male_chance = self.genes.male_chance + uniform(-self.genes.male_chance*0.1,self.genes.male_chance*0.1)
         new_gestation = self.genes.gestation + uniform(-self.genes.gestation*0.1,self.genes.gestation*0.1)
 
-        male_chance = (self.genes.male_chance + self.mate.genes.male_chance)
+        male_chance = (self.genes.male_chance + self.mate.genes.male_chance)/2
         satiety = self.satiety*0.20
         hydration = self.hydrated*0.20
 
@@ -272,7 +272,7 @@ class Person:
                  target = None,
                  mate = None,
                  alive = True,
-                 sex = "male" if uniform(0,1) < male_chance else "female",
+                 sex = "male" if uniform(0,1) < 0.5 else "female",
                  genes = Genes(
                      new_size,
                      new_speed,

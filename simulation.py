@@ -73,9 +73,9 @@ class Simulation:
         self.season = None
         self.mutation_rate = 1
 
-        self.starting_population = 500
+        self.starting_population = 10000
 
-        total = 500
+        total = 50000
         self.permanent_sources_number = 100
         self.food_water_size = 0.2
         self.food_max = total
@@ -154,7 +154,7 @@ class Simulation:
             self.permanent_sources.append(p)
         
         self.season = "Spring"
-        for i in range(5000):
+        for i in range(50000):
             Source.respawn(self)
             self.day+=1
     def create_graphs(self):

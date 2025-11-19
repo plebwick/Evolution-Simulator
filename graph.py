@@ -80,7 +80,7 @@ class Graph:
         draw_line(self, averages, sim)
 
         #Draw Median line
-        draw_line(self, medians, sim)
+        #draw_line(self, medians, sim)
 
         #Draw Max line
         #draw_line(self, maximums, sim)
