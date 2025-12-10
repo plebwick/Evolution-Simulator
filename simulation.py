@@ -40,7 +40,7 @@ class Simulation:
         self.selected_graph = 0
         self.graph_time = self.screen_x
         self.graph_grid_size = 100
-        self.sampling_frequency = 100
+        self.sampling_frequency = 1
         
         self.graph_x_size = round(self.screen_x*0.8,-2)
         self.graph_y_size = round(self.screen_y*0.8,-2)
@@ -73,7 +73,7 @@ class Simulation:
         self.season = None
         self.mutation_rate = 1
 
-        self.starting_population = 10000
+        self.starting_population = 200
 
         total = 50000
         self.permanent_sources_number = 100
@@ -240,6 +240,8 @@ class Simulation:
 
         if self.keys[pygame.K_w]:
             self.camera_y -= self.move_speed
+        if self.keys[pygame.K_w]:
+            self.camera_y -= self.move_speed
         if self.keys[pygame.K_s]:
             self.camera_y += self.move_speed
         if self.keys[pygame.K_a]:
@@ -371,8 +373,10 @@ class Simulation:
                 person_x = self.normalise_coordinate(self.selected_person.target.x, 0)
                 person_y = self.normalise_coordinate(self.selected_person.target.y, 1)
                 pygame.draw.circle(self.screen, "orange", (person_x, person_y), max(1,person_size*self.zoom))
-
         
+        chance = 1/2 * sin((1/25000) * self.day) + 1
+        self.draw_text(200, 200, "Respawn Chance: " + str(round(chance,2)) + "%", "#FFFFFF")
+
         self.draw_text(50, 220, f"Season {self.season}", (255,255,255), "left")
         self.draw_text(50, 60, f"Speed {round(self.FPS/60)}", place = "left")
         self.draw_text(50, 100, f"Zoom {round(self.zoom)}", place = "left")
@@ -391,7 +395,7 @@ class Simulation:
         
         #draw changing variables
         self.draw_text(left+20, 300, f"Activity: {person.activity}", place = "left")
-        self.draw_text(left+20, 330, f"Age: {person.age}", place = "left")
+        self.draw_text(left+20, 330, f"Age: {person.age/1000}", place = "left")
         self.draw_text(left+20, 360, f"Gestational period: {person.gestational}", place = "left")
 
         #draw person
