@@ -100,6 +100,12 @@ class Graph:
 def draw_line(self, values, sim):
     step = len(values)/(sim.graph_x_size)
 
+    
+    #if (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i*step)]-self.min_value)/self.difference) <= sim.y_offset:
+    #    pass
+    #if (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i*step)]-self.min_value)/self.difference) >= sim.graph_y_size+sim.y_offset:
+    #    pass
+
     if len(values) > sim.graph_x_size:
         value_points = [(i+sim.x_offset, (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i*step)]-self.min_value)/self.difference))
                 for i in range(0, round(sim.graph_x_size))]

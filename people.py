@@ -75,13 +75,13 @@ class Person:
 
         number = 5
         size_factor = self.size/number
+        agility_factor = self.agility*2/number
         speed_factor = self.speed/number
         vision_range_factor = self.vision_range/number
         vision_angle_factor = self.vision_angle/number
-        agility_factor = self.agility/number
 
         scale = 100000
-        self.metabolic_rate = 1/(scale*2) + (size_factor + speed_factor + vision_range_factor + vision_angle_factor + agility_factor)/(number*(scale/2))#((size/5)**2 * (speed/5)**2 * 0.1) / 432 / 5
+        self.metabolic_rate = 1/(scale*2) + (size_factor + speed_factor + vision_range_factor + vision_angle_factor + agility_factor)/(number*(scale/1))#((size/5)**2 * (speed/5)**2 * 0.1) / 432 / 5
         self.stomach_size = self.size*2
         self.bladder_size = self.size*2
 

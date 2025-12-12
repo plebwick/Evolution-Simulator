@@ -19,7 +19,7 @@ class Source:
         #if sim.season == "Autumn": season_frequency = 100
         #if sim.season == "Winter": season_frequency = 150
         #season_frequency = abs(sin(sim.day))
-        chance = 1/2 * sin((1/25000) * sim.day) + 1
+        chance = 1/1000 * sin((1/25000) * sim.day) + 1
         
         if uniform(0,1) < chance/100:
             if len(sim.sources) < (sim.food_max + sim.water_max):
