@@ -18,10 +18,11 @@ def main():
     sim.create_people()
     sim.create_sources()
     sim.create_graphs()
+    sim.create_sliders()
 
     previous_time = time.perf_counter()
     needed = 0 
-    current_screen = "sim"
+    current_screen = "start"
     draw = "sim"
 
     while True:
@@ -38,7 +39,7 @@ def main():
         #Key Presses
 
         if current_screen == "start":
-            pass
+            sim.draw_start_screen()
         elif current_screen == "sim":
             for event in sim.events:
                 if event.type == pygame.KEYDOWN:

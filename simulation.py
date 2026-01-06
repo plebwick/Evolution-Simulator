@@ -1,4 +1,4 @@
-import pygame, inspect
+import pygame, inspect, pyautogui
 from random import randint, uniform
 from math import pi, ceil, cos, sin
 from sources import Source
@@ -8,11 +8,51 @@ from people import Genes
 from collections import defaultdict
 from time import time, perf_counter
 
+
+class Slider:
+    def __init__(self, x, y, w, min, max, colour, attribute, current_value):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.min = min
+        self.max = max
+        self.colour = colour
+        self.attritube = attribute
+        self.current_value = current_value
+        self.handle_radius = 20
+
+    def draw(self, sim):
+        pygame.draw.rect(sim.screen, self.colour, (self.x, self.y, self.w, 10))
+        handle_x = self.x + (self.current_value - self.min) / (self.max - self.min) * self.w
+        pygame.draw.circle(sim.screen, (255, 255, 255), (int(handle_x), self.y + 5), 6)
+
+    def draw_text(self, sim):
+        sim.draw_text(self.x - 150, self.y+5, self.attritube, (255, 255, 255), "left", 16)
+
+        sim.draw_text(self.x, self.y + 20 , f"Min: {self.min}", (255, 255, 255), "left", 12)
+        sim.draw_text(self.x + self.w - 50, self.y + 20, f"Max: {self.max}", (255, 255, 255), "left", 12)
+
+        sim.draw_text(self.x + self.w / 2, self.y - 20, f"Value: {round(self.current_value, 2)}", (255, 255, 255), size = 16)
+
+    def pulled(self, mouse_x, mouse_y):
+        relative_x = mouse_x - self.x
+
+        if relative_x > -self.handle_radius and relative_x < self.w+self.handle_radius:
+
+            relative_y = mouse_y - self.y
+
+            if relative_y > -self.handle_radius and relative_y < self.handle_radius+10:
+
+                if pygame.mouse.get_pressed()[0]:
+
+                    self.current_value = max(min(self.min + (relative_x / self.w) * (self.max - self.min), self.max), self.min)
+
 class Simulation:
     def __init__(self):
         self.people = []
         self.sources = []
         self.permanent_sources = []
+        self.sliders = []
 
         self.gene_dict = {
             "size": "blue",
@@ -82,6 +122,13 @@ class Simulation:
         self.water_max = total
         self.food_water_chance = 0.5
 
+    def create_sliders(self):
+        self.sliders.append(Slider(325, 300, 300, 0.1, 5, "red", "Mutation_rate", self.mutation_rate))
+        self.sliders.append(Slider(325, 375, 300, 50, 500, "blue", "Starting_population", self.starting_population))
+        self.sliders.append(Slider(325, 450, 300, 1000, 100000, "green", "Food_max", self.food_max))
+        self.sliders.append(Slider(325, 525, 300, 1000, 100000, "purple", "Water_max", self.water_max))
+        self.sliders.append(Slider(325, 600, 300, 0.1, 1, "yellow", "Food_water_chance", self.food_water_chance))
+    
     def create_people(self):
         
         self.people = [Person(x = randint(0,self.world_x_size),
@@ -157,6 +204,7 @@ class Simulation:
         for i in range(50000):
             Source.respawn(self)
             self.day+=1
+    
     def create_graphs(self):
         #Adds all genes to graphs
         for gene in self.genes.parameters:
@@ -314,8 +362,12 @@ class Simulation:
             x2 = (self.world_x_size - self.camera_x) * self.zoom + self.screen_x/2
             pygame.draw.line(self.screen, (255,255,255), (x1,y), (x2, y), 1)
 
-    def draw_text(self, x, y, text, colour = (255, 255, 255), place = "centre"):
-        text = self.font.render(f"{text}",  True, colour)
+    def draw_text(self, x, y, text, colour = (255, 255, 255), place = "centre", size = 24):
+        if size != 24:
+            font = pygame.font.Font("Pompadour.otf", size)
+        else:
+            font = self.font
+        text = font.render(f"{text}",  True, colour)
         if place == "centre": rect = text.get_rect(center = (x,y))
         elif place == "left": rect = text.get_rect(midleft = (x,y))
         self.screen.blit(text, rect)
@@ -326,6 +378,22 @@ class Simulation:
         surface.set_alpha(alpha)
         pygame.draw.rect(surface, colour, surface.get_rect(), border_size)
         self.screen.blit(surface, rect)
+
+    def draw_start_screen(self):
+        self.screen.fill("#131729")
+        self.draw_text(self.screen_x/2, 100, "Evolution Simulation", (255,255,255), size = 64)
+        self.draw_text(self.screen_x/2, self.screen_y - 100, "Press SPACE to Start", (200,200,200), size = 48)
+
+        self.draw_text(self.screen_x/4, 250, "Simulation", (255,255,255), size = 42)
+        self.draw_text(3*self.screen_x/4, 250, "Creature Simulation", (255,255,255), size = 42)
+
+        mouse_x = pygame.mouse.get_pos()[0]
+        mouse_y = pygame.mouse.get_pos()[1]
+
+        for slider in self.sliders:
+            slider.draw_text(self)
+            slider.draw(self)
+            slider.pulled(mouse_x, mouse_y)
 
     def draw_simulation(self):
         self.screen.fill("#131729")
