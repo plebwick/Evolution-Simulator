@@ -15,10 +15,10 @@ def main():
     screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))
     pygame.display.set_caption("Evolution Simulation")
 
-    sim.create_people()
-    sim.create_sources()
     sim.create_graphs()
     sim.create_sliders()
+    #sim.create_sim_sliders()
+    sim.create_graph_sliders()
 
     previous_time = time.perf_counter()
     needed = 0 
@@ -39,6 +39,13 @@ def main():
         #Key Presses
 
         if current_screen == "start":
+            for event in sim.events:
+                if event.type == pygame.KEYDOWN:
+                    #toggle pause
+                    if event.key == pygame.K_SPACE:
+                        current_screen = "sim"
+                        sim.create_people()
+                        sim.create_sources()
             sim.draw_start_screen()
         elif current_screen == "sim":
             for event in sim.events:

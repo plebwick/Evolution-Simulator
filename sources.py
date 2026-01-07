@@ -38,13 +38,13 @@ class Source:
                     if uniform(0,1) > food_chance: type = "food"
                     else: type = "water"
 
-                random_source = sim.permanent_sources[randint(0,len(sim.permanent_sources)-1)]
-                x = min(max(random_source[0] + randint(-100,100),0),sim.world_x_size)
-                y = min(max(random_source[1] + randint(-100,100),0),sim.world_y_size)
-                type = random_source[2]
+                #random_source = sim.permanent_sources[randint(0,len(sim.permanent_sources)-1)]
+                #x = min(max(random_source[0] + randint(-100,100),0),sim.world_x_size)
+                #y = min(max(random_source[1] + randint(-100,100),0),sim.world_y_size)
+                #type = random_source[2]
 
-                x = randint(0, sim.world_x_size)
-                y = randint(0, sim.world_y_size)
+                x = randint(0, round(sim.world_x_size))
+                y = randint(0, round(sim.world_y_size))
 
                 if len(food):
                     type = "water" if len(food)/len(sim.sources) > 0.5 else "food"
