@@ -118,27 +118,27 @@ class Simulation:
         self.season = None
 
         #custom person
-        self.size = 0
-        self.speed = 0
-        self.agility = 0
-        self.wander_agility = 0
-        self.vision_range = 0
-        self.vision_angle = 0
-        self.fertility = 0
-        self.virility = 0
-        self.male_chance = 0
-        self.gestation = 0
+        self.size = 0.5
+        self.speed = 0.5
+        self.agility = 1
+        self.wander_agility = 0.05
+        self.vision_range = 500
+        self.vision_angle = pi/2
+        self.fertility = 0.5
+        self.virility = 0.1
+        self.male_chance = 0.5
+        self.gestation = 500
 
         #editable
         self.world_x_size = self.screen_x*6
         self.world_y_size = self.screen_y*6
-        self.mutation_rate = 1
-        self.starting_population = 200
+        self.mutation_rate = 0.1
+        self.starting_population = 250
         self.food_water_chance = 0.5
+        self.food_water_size = 0.2
 
         total = 50000
         self.permanent_sources_number = 100
-        self.food_water_size = 0.2
         self.food_max = total
         self.water_max = total
 
@@ -152,14 +152,16 @@ class Simulation:
     def create_sliders(self):
         self.sliders.append(Slider(325, 400, 300, 50, 500, "yellow", "Starting population", "starting_population", self.starting_population))
 
-        self.sliders.append(Slider(325, 475, 300, 0.1, 5, "green", "Mutation rate", "mutation_rate", self.mutation_rate))
+        self.sliders.append(Slider(325, 475, 300, 0, 1, "green", "Mutation rate", "mutation_rate", self.mutation_rate))
 
         #self.sliders.append(Slider(325, 475, 300, 200, 100000, "green", "Food max", "food_max", self.food_max))
         #self.sliders.append(Slider(325, 550, 300, 200, 100000, "purple", "Water max", "water_max", self.water_max))
-        self.sliders.append(Slider(325, 550, 300, 0, 1, "purple", "Food/water chance", "food_water_chance", self.food_water_chance))
+        self.sliders.append(Slider(325, 550, 300, 0, 1, "red", "Food/water size", "food_water_size", self.food_water_size))
 
-        self.sliders.append(Slider(325, 625, 300, 1000, 25000, "#AAAAAA", "World x size", "world_x_size", self.world_x_size))
-        self.sliders.append(Slider(325, 700, 300, 1000, 25000, "#AAAAAA", "World y size", "world_y_size", self.world_y_size))
+        self.sliders.append(Slider(325, 625, 300, 0, 1, "purple", "Food/water chance", "food_water_chance", self.food_water_chance))
+
+        self.sliders.append(Slider(325, 700, 300, 1000, 25000, "#AAAAAA", "World x size", "world_x_size", self.world_x_size))
+        self.sliders.append(Slider(325, 775, 300, 1000, 25000, "#AAAAAA", "World y size", "world_y_size", self.world_y_size))
 
         self.sliders.append(Slider(1285, 325, 300, 0, 1, "blue", "Size", "size", self.size))
         self.sliders.append(Slider(1285, 385, 300, 0, 1, "red", "Speed", "speed", self.speed))
@@ -177,7 +179,7 @@ class Simulation:
         #self.sim_sliders.append(Slider(50, 975, 300, 100, 2000, "cyan", "Graph Time Range", "graph_time", self.graph_time))
 
     def create_graph_sliders(self):
-        self.graph_sliders.append(Slider(200, 975, 500, 50, self.day, "cyan", "Graph Time Range", "graph_time", self.graph_time))
+        self.graph_sliders.append(Slider(650, 1040, 500, 50, 0, "cyan", "Graph Time Range", "graph_time", 0))
 
     def create_people(self):
         if self.randomise_people:
@@ -595,7 +597,13 @@ class Simulation:
         mouse_x = pygame.mouse.get_pos()[0]
         mouse_y = pygame.mouse.get_pos()[1]
 
-        self.graph_sliders[0].max = self.day/self.sampling_frequency
+        if self.graph_sliders[0].current_value == self.graph_sliders[0].max:
+            self.graph_sliders[0].max = (self.day-50000)/100
+            self.graph_sliders[0].current_value = self.graph_sliders[0].max
+            setattr(self, self.graph_sliders[0].actual, self.graph_sliders[0].current_value)
+        else:
+            self.graph_sliders[0].max = (self.day-50000)/100
+
         for slider in self.graph_sliders:
             slider.draw_text(self)
             slider.draw(self)
@@ -631,5 +639,5 @@ class Simulation:
             pygame.draw.rect(surface, self.gene_dict[graph.gene], surface.get_rect())
             self.screen.blit(surface, rect)
 
-            if alpha == 192: self.draw_text(x_pos + 0.5*x_size, y_size*2, f"{graph.gene[0].upper()}{graph.gene[1:]}", "#FFFFFF")
-            elif alpha == 64: self.draw_text(x_pos + 0.5*x_size, y_size*2, f"{graph.gene[0].upper()}{graph.gene[1:]}", "#AFAFAF")
+            if alpha == 192: self.draw_text(x_pos + 0.5*x_size, y_size*2, f"{graph.gene[0].upper()}{graph.gene[1:]}", "#FFFFFF", size = 16)
+            elif alpha == 64: self.draw_text(x_pos + 0.5*x_size, y_size*2, f"{graph.gene[0].upper()}{graph.gene[1:]}", "#AFAFAF", size = 16)

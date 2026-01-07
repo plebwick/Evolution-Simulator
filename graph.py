@@ -70,6 +70,7 @@ class Graph:
         minimums = self.minimums[-round(sim.graph_time):]
 
         total = averages + medians #+ maximums + minimums
+
         
         self.min_value = min(total)-min(total)*0.1 if total else 0
         self.max_value = max(total)+max(total)*0.1 if total else 1
@@ -91,7 +92,7 @@ class Graph:
         display_time = min(len(averages), sim.graph_time)
 
         #draws the text
-        sim.draw_text(sim.x_offset, sim.y_offset+sim.graph_y_size+20, f"{display_time} ticks ago", place = "left")
+        sim.draw_text(sim.x_offset, sim.y_offset+sim.graph_y_size+20, f"{round(display_time)} ticks ago", place = "left")
         sim.draw_text(sim.x_offset+sim.graph_x_size, sim.y_offset+sim.graph_y_size+20, "0 ticks ago", place = "left")
 
         sim.draw_text(sim.x_offset-50, sim.y_offset, round(self.max_value,2), place = "left")

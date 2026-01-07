@@ -92,7 +92,7 @@ class Person:
         x = sim.normalise_coordinate(self.x, 0)
         y = sim.normalise_coordinate(self.y, 1)
         if 0 < x < sim.screen_x and 0 < y < sim.screen_y:
-            size = self.genes.size*3
+            size = self.genes.size
 
             colour = (255,255,255)
             if self.activity == "mate": 
@@ -246,22 +246,39 @@ class Person:
         else:
             self.gestational += 1
 
+    def mutate(self, sim, gene1, gene2):
+        gene = (gene1 + gene2)/2
+        new_gene = gene * uniform(1-sim.mutation_rate,1+sim.mutation_rate)
+        return new_gene
+    
     def reproduce(self,sim):
         self.gestational = None
         self.postnatal = 1
 
-        new_size = self.genes.size + uniform(-self.genes.size*0.1,self.genes.size*0.1)
-        new_speed = self.genes.speed + uniform(-self.genes.speed*0.1,self.genes.speed*0.1)
-        new_agility = self.genes.agility + uniform(-self.genes.agility*0.1,self.genes.agility*0.1)
-        new_wander_agility = self.genes.wander_agility + uniform(-self.genes.wander_agility*0.1,self.genes.wander_agility*0.1)
-        new_vision_range = self.genes.vision_range + uniform(-self.genes.vision_range*0.1,self.genes.vision_range*0.1)
-        new_vision_angle = self.genes.vision_angle + uniform(-self.genes.vision_angle*0.1,self.genes.vision_angle*0.1)
-        new_fertility = self.genes.fertility + uniform(-self.genes.fertility*0.1,self.genes.fertility*0.1)
-        new_virility = self.genes.virility + uniform(-self.genes.virility*0.1,self.genes.virility*0.1)
-        new_male_chance = self.genes.male_chance + uniform(-self.genes.male_chance*0.1,self.genes.male_chance*0.1)
-        new_gestation = self.genes.gestation + uniform(-self.genes.gestation*0.1,self.genes.gestation*0.1)
+        new_size = self.mutate(sim, self.genes.size, self.mate.genes.size)
+        new_speed = self.mutate(sim, self.genes.speed, self.mate.genes.speed)
+        new_agility = self.mutate(sim, self.genes.agility, self.mate.genes.agility)
+        new_wander_agility = self.mutate(sim, self.genes.wander_agility, self.mate.genes.wander_agility)
+        new_vision_range = self.mutate(sim, self.genes.vision_range, self.mate.genes.vision_range)
+        new_vision_angle = self.mutate(sim, self.genes.vision_angle, self.mate.genes.vision_angle)
+        new_fertility = self.mutate(sim, self.genes.fertility, self.mate.genes.fertility)
+        new_virility = self.mutate(sim, self.genes.virility, self.mate.genes.virility)
+        new_male_chance = self.mutate(sim, self.genes.male_chance, self.mate.genes.male_chance)
+        new_male_chance = self.mutate(sim, self.genes.male_chance, self.mate.genes.male_chance)
+        new_gestation = self.mutate(sim, self.genes.gestation, self.mate.genes.gestation)
 
-        male_chance = (self.genes.male_chance + self.mate.genes.male_chance)/2
+        #new_size = self.genes.size + uniform(-self.genes.size*sim.mutation_rate,self.genes.size*self.mutation_rate)
+        #new_speed = self.genes.speed + uniform(-self.genes.speed*self.mutation_rate,self.genes.speed*self.mutation_rate)
+        #new_agility = self.genes.agility + uniform(-self.genes.agility*self.mutation_rate,self.genes.agility*self.mutation_rate)
+        #new_wander_agility = self.genes.wander_agility + uniform(-self.genes.wander_agility*self.mutation_rate,self.genes.wander_agility*self.mutation_rate)
+        #new_vision_range = self.genes.vision_range + uniform(-self.genes.vision_range*self.mutation_rate,self.genes.vision_range*self.mutation_rate)
+        #new_vision_angle = self.genes.vision_angle + uniform(-self.genes.vision_angle*self.mutation_rate,self.genes.vision_angle*self.mutation_rate)
+        #new_fertility = self.genes.fertility + uniform(-self.genes.fertility*self.mutation_rate,self.genes.fertility*self.mutation_rate)
+        #new_virility = self.genes.virility + uniform(-self.genes.virility*self.mutation_rate,self.genes.virility*self.mutation_rate)
+        #new_male_chance = self.genes.male_chance + uniform(-self.genes.male_chance*self.mutation_rate,self.genes.male_chance*self.mutation_rate)
+        #new_gestation = self.genes.gestation + uniform(-self.genes.gestation*self.mutation_rate,self.genes.gestation*self.mutation_rate)
+
+        #male_chance = (self.genes.male_chance + self.mate.genes.male_chance)/2
         satiety = self.satiety*0.20
         hydration = self.hydrated*0.20
 
