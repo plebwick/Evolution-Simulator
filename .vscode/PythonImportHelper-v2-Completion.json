@@ -282,7 +282,7 @@
         "kind": 2,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "def main():\n    pygame.init()\n    clock = pygame.time.Clock()\n    sim = Simulation()\n    screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\n    pygame.display.set_caption(\"Evolution Simulation\")\n    sim.create_people()\n    sim.create_sources()\n    sim.create_graphs()\n    previous_time = time.perf_counter()",
+        "peekOfCode": "def main():\n    pygame.init()\n    clock = pygame.time.Clock()\n    sim = Simulation()\n    screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))\n    pygame.display.set_caption(\"Evolution Simulation\")\n    sim.create_graphs()\n    sim.create_sliders()\n    #sim.create_sim_sliders()\n    sim.create_graph_sliders()",
         "detail": "main",
         "documentation": {}
     },
@@ -305,11 +305,20 @@
         "documentation": {}
     },
     {
+        "label": "Slider",
+        "kind": 6,
+        "importPath": "simulation",
+        "description": "simulation",
+        "peekOfCode": "class Slider:\n    def __init__(self, x, y, w, min, max, colour, attribute, actual, current_value):\n        self.x = x\n        self.y = y\n        self.w = w\n        self.min = min\n        self.max = max\n        self.colour = colour\n        self.attribute = attribute\n        self.actual = actual",
+        "detail": "simulation",
+        "documentation": {}
+    },
+    {
         "label": "Simulation",
         "kind": 6,
         "importPath": "simulation",
         "description": "simulation",
-        "peekOfCode": "class Simulation:\n    def __init__(self):\n        self.people = []\n        self.sources = []\n        self.permanent_sources = []\n        self.gene_dict = {\n            \"size\": \"blue\",\n            \"speed\": \"red\",\n            \"agility\": \"yellow\",\n            \"wander_agility\":\"indigo\",",
+        "peekOfCode": "class Simulation:\n    def __init__(self):\n        self.people = []\n        self.sources = []\n        self.permanent_sources = []\n        self.sliders = []\n        self.sim_sliders = []\n        self.graph_sliders = []\n        self.gene_dict = {\n            \"size\": \"blue\",",
         "detail": "simulation",
         "documentation": {}
     },
