@@ -70,6 +70,7 @@ class Graph:
         minimums = self.minimums[-round(sim.graph_time):]
 
         total = averages + medians #+ maximums + minimums
+
         
         self.min_value = min(total)-min(total)*0.1 if total else 0
         self.max_value = max(total)+max(total)*0.1 if total else 1
@@ -80,7 +81,7 @@ class Graph:
         draw_line(self, averages, sim)
 
         #Draw Median line
-        draw_line(self, medians, sim)
+        #draw_line(self, medians, sim)
 
         #Draw Max line
         #draw_line(self, maximums, sim)
@@ -91,7 +92,7 @@ class Graph:
         display_time = min(len(averages), sim.graph_time)
 
         #draws the text
-        sim.draw_text(sim.x_offset, sim.y_offset+sim.graph_y_size+20, f"{display_time} ticks ago", place = "left")
+        sim.draw_text(sim.x_offset, sim.y_offset+sim.graph_y_size+20, f"{round(display_time)} ticks ago", place = "left")
         sim.draw_text(sim.x_offset+sim.graph_x_size, sim.y_offset+sim.graph_y_size+20, "0 ticks ago", place = "left")
 
         sim.draw_text(sim.x_offset-50, sim.y_offset, round(self.max_value,2), place = "left")
@@ -99,6 +100,12 @@ class Graph:
 
 def draw_line(self, values, sim):
     step = len(values)/(sim.graph_x_size)
+
+    
+    #if (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i*step)]-self.min_value)/self.difference) <= sim.y_offset:
+    #    pass
+    #if (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i*step)]-self.min_value)/self.difference) >= sim.graph_y_size+sim.y_offset:
+    #    pass
 
     if len(values) > sim.graph_x_size:
         value_points = [(i+sim.x_offset, (sim.graph_y_size + sim.y_offset - sim.graph_y_size*(values[int(i*step)]-self.min_value)/self.difference))

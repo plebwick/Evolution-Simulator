@@ -1,5 +1,6 @@
 from random import randint, uniform
 import pygame
+from math import sin
 
 class Source:
     def __init__(self,
@@ -13,11 +14,14 @@ class Source:
         self.type = type
 
     def respawn(sim):
-        if sim.season == "Spring": season_frequency = 100
-        if sim.season == "Summer": season_frequency = 75
-        if sim.season == "Autumn": season_frequency = 100
-        if sim.season == "Winter": season_frequency = 150
-        if sim.day % season_frequency == 0:
+        #if sim.season == "Spring": season_frequency = 100
+        #if sim.season == "Summer": season_frequency = 75
+        #if sim.season == "Autumn": season_frequency = 100
+        #if sim.season == "Winter": season_frequency = 150
+        #season_frequency = abs(sin(sim.day))
+        chance = 1/1000 * sin((1/25000) * sim.day) + 1
+        
+        if uniform(0,1) < chance/100:
             if len(sim.sources) < (sim.food_max + sim.water_max):
                 food = [source for source in sim.sources if source.type == "food"]
                 water = [source for source in sim.sources if source.type == "water"]
@@ -34,13 +38,13 @@ class Source:
                     if uniform(0,1) > food_chance: type = "food"
                     else: type = "water"
 
-                random_source = sim.permanent_sources[randint(0,len(sim.permanent_sources)-1)]
-                x = min(max(random_source[0] + randint(-100,100),0),sim.world_x_size)
-                y = min(max(random_source[1] + randint(-100,100),0),sim.world_y_size)
-                type = random_source[2]
+                #random_source = sim.permanent_sources[randint(0,len(sim.permanent_sources)-1)]
+                #x = min(max(random_source[0] + randint(-100,100),0),sim.world_x_size)
+                #y = min(max(random_source[1] + randint(-100,100),0),sim.world_y_size)
+                #type = random_source[2]
 
-                x = randint(0, sim.world_x_size)
-                y = randint(0, sim.world_y_size)
+                x = randint(0, round(sim.world_x_size))
+                y = randint(0, round(sim.world_y_size))
 
                 if len(food):
                     type = "water" if len(food)/len(sim.sources) > 0.5 else "food"

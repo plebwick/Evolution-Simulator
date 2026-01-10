@@ -15,13 +15,14 @@ def main():
     screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))
     pygame.display.set_caption("Evolution Simulation")
 
-    sim.create_people()
-    sim.create_sources()
     sim.create_graphs()
+    sim.create_sliders()
+    #sim.create_sim_sliders()
+    sim.create_graph_sliders()
 
     previous_time = time.perf_counter()
     needed = 0 
-    current_screen = "sim"
+    current_screen = "start"
     draw = "sim"
 
     while True:
@@ -38,7 +39,14 @@ def main():
         #Key Presses
 
         if current_screen == "start":
-            pass
+            for event in sim.events:
+                if event.type == pygame.KEYDOWN:
+                    #toggle pause
+                    if event.key == pygame.K_SPACE:
+                        current_screen = "sim"
+                        sim.create_people()
+                        sim.create_sources()
+            sim.draw_start_screen()
         elif current_screen == "sim":
             for event in sim.events:
                 if event.type == pygame.KEYDOWN:
@@ -60,7 +68,7 @@ def main():
 
             if sim.keys[pygame.K_LCTRL]:
                 sim.FPS /= (1 + sim.zoom_speed)
-                sim.FPS = max(60, min(60000, sim.FPS)) 
+                sim.FPS = max(60, min(60000, sim.FPS))
             if sim.keys[pygame.K_LSHIFT]:
                 sim.FPS *= (1 + sim.zoom_speed)
                 sim.FPS = max(60, min(60000, sim.FPS))
