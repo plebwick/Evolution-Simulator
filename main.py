@@ -12,18 +12,18 @@ def main():
 
     sim = Simulation()
 
-    screen = pygame.display.set_mode((sim.screen_x,sim.screen_y))
     pygame.display.set_caption("Evolution Simulation")
 
     sim.create_graphs()
     sim.create_sliders()
-    #sim.create_sim_sliders()
     sim.create_graph_sliders()
+
+    sim.create_buttons()
+    sim.create_sim_buttons()
+    sim.create_graph_buttons()
 
     previous_time = time.perf_counter()
     needed = 0 
-    current_screen = "start"
-    draw = "sim"
 
     while True:
         FPS_time = time.perf_counter()
@@ -38,16 +38,16 @@ def main():
 
         #Key Presses
 
-        if current_screen == "start":
+        if sim.current_screen == "start":
             for event in sim.events:
                 if event.type == pygame.KEYDOWN:
-                    #toggle pause
                     if event.key == pygame.K_SPACE:
-                        current_screen = "sim"
+                        sim.current_screen = "sim"
                         sim.create_people()
                         sim.create_sources()
+                        sim.create_sim_sliders()
             sim.draw_start_screen()
-        elif current_screen == "sim":
+        elif sim.current_screen == "sim":
             for event in sim.events:
                 if event.type == pygame.KEYDOWN:
                     #toggle pause
@@ -61,10 +61,10 @@ def main():
 
                     #toggle graph
                     if event.key == pygame.K_h:
-                        if draw == "sim": 
-                            draw = "graph"
-                        elif draw == "graph": 
-                            draw = "sim"
+                        if sim.draw == "sim": 
+                            sim.draw = "graph"
+                        elif sim.draw == "graph": 
+                            sim.draw = "sim"
 
             if sim.keys[pygame.K_LCTRL]:
                 sim.FPS /= (1 + sim.zoom_speed)
@@ -86,12 +86,12 @@ def main():
                     sim.update_simulation()
                     needed -= 1/sim.FPS
 
-            if draw == "sim":
+            if sim.draw == "sim":
                 sim.simulation_inputs()
 
                 sim.draw_simulation()
                 sim.draw_simulation_ui()
-            elif draw == "graph":
+            elif sim.draw == "graph":
                 sim.graph_inputs()
 
                 sim.draw_graphs()
@@ -101,7 +101,7 @@ def main():
 
         sim.draw_text(10, 20, f"{round(1/FPS_time)} FPS", place = "left")
 
-        if True:
+        if False:
             if round(1/FPS_time,2) > 60:
                 sim.FPS *= (1.005)
             elif round(1/FPS_time,2) < 60:

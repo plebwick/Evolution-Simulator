@@ -49,14 +49,66 @@ class Slider:
                     self.current_value = max(min(self.min + (relative_x / self.w) * (self.max - self.min), self.max), self.min)
                     setattr(sim, self.actual, self.current_value)
 
+                    sources = []
+                    if self.actual == "world_x_size": sources = [source for source in sim.sources if source.x > sim.world_x_size]
+                    elif self.actual == "world_y_size": sources = [source for source in sim.sources if source.y > sim.world_y_size]
+                    for source in sources:
+                        sim.sources.remove(source)
+                        sim.grid[source.grid].remove(source)
+
+class Button:
+    def __init__(self, x, y, width, length, on_colour, off_colour, attribute, action):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.length = length
+        self.status = True
+        self.on_colour = on_colour
+        self.off_colour = off_colour
+        self.attribute = attribute
+        self.action = action
+        self.already_clicked = False
+
+    def draw(self, sim):
+        if self.status:
+            pygame.draw.rect(sim.screen, self.on_colour, (self.x, self.y, self.width, self.length))
+            pygame.draw.rect(sim.screen, "white", (self.x, self.y, self.width, self.length), 1)
+        else: 
+            pygame.draw.rect(sim.screen, self.off_colour, (self.x, self.y, self.width, self.length))
+            pygame.draw.rect(sim.screen, "white", (self.x, self.y, self.width, self.length), 1)
+
+        sim.draw_text(self.x+self.width/2, self.y+self.length/2, (self.attribute[0].upper()+self.attribute[1:]), (255,255,255), size = 24)
+
+    def pressed(self, sim, mouse_x, mouse_y):
+        relative_x = mouse_x - self.x
+
+        if relative_x > 0 and relative_x < self.width:
+
+            relative_y = mouse_y - self.y
+
+            if relative_y > 0 and relative_y < self.length:
+                mouse_down = pygame.mouse.get_pressed()[0]
+                if mouse_down and not self.already_clicked:
+                    self.action(sim)
+                    self.status = not self.status
+                    self.already_clicked = True
+                elif not mouse_down:
+                    self.already_clicked = False
+
+
 class Simulation:
     def __init__(self):
         self.people = []
         self.sources = []
         self.permanent_sources = []
+
         self.sliders = []
         self.sim_sliders = []
         self.graph_sliders = []
+
+        self.buttons = []
+        self.sim_buttons = []
+        self.graph_buttons = []
 
         self.gene_dict = {
             "size": "blue",
@@ -69,6 +121,7 @@ class Simulation:
             "virility":"#8C00FF",
             "male_chance":"#FF00AA",
             "gestation":"#FFAE51",
+            "Metabolic rate":"#000000",
             "Population":"#6DFFFF",
             "Sources":"#FFFFFF",
             "Male/Female":"#FF008C"
@@ -89,6 +142,9 @@ class Simulation:
 
         self.screen_x = 1920
         self.screen_y = 1080
+
+        self.current_screen = "start"
+        self.draw = "sim"
 
         self.graphs = []
         self.selected_graph = 0
@@ -118,26 +174,40 @@ class Simulation:
         self.season = None
 
         #custom person
-        self.size = 0.5
-        self.speed = 0.5
-        self.agility = 1
+        self.size = 1
+        self.speed = 1
+        self.agility = 0.1
         self.wander_agility = 0.05
-        self.vision_range = 500
-        self.vision_angle = pi/2
+        self.vision_range = 750
+        self.vision_angle = pi
         self.fertility = 0.5
         self.virility = 0.1
         self.male_chance = 0.5
         self.gestation = 500
+
+        self.size_max = 5
+        self.speed_max = 5
+        self.agility_max = 2*pi
+        self.wander_agility_max = 0.2
+        self.vision_range_max = 2000
+        self.vision_angle_max = 2*pi
+        self.fertility_max = 1
+        self.virility_max = 1
+        self.male_chance_max = 1
+        self.gestation_max = 2000
 
         #editable
         self.world_x_size = self.screen_x*6
         self.world_y_size = self.screen_y*6
         self.mutation_rate = 0.1
         self.starting_population = 250
-        self.food_water_chance = 0.5
-        self.food_water_size = 0.2
+        self.food_water_chance = 0.25
+        self.food_water_size = 1
+        self.season_impact = 0
+        self.season_length = 25000
+        self.source_respawn_rate = 1
 
-        total = 50000
+        total = 10000
         self.permanent_sources_number = 100
         self.food_max = total
         self.water_max = total
@@ -145,41 +215,72 @@ class Simulation:
         self.camera_x = self.world_x_size/2
         self.camera_y = self.world_y_size/2
         self.zoom =  self.screen_x/self.world_x_size
-        self.move_speed = 20/(self.zoom)
+        self.move_speed = 30/(self.zoom)
         self.zoom_speed = 0.05
         self.selected_person = None
 
     def create_sliders(self):
-        self.sliders.append(Slider(325, 400, 300, 50, 500, "yellow", "Starting population", "starting_population", self.starting_population))
+        self.sliders.append(Slider(325, 325, 300, 50, 500, "yellow", "Starting Population", "starting_population", self.starting_population))
+        self.sliders.append(Slider(325, 380, 300, 0, 1, "green", "Mutation rate", "mutation_rate", self.mutation_rate))
+        self.sliders.append(Slider(325, 435, 300, 0, 1, "red", "Food-water size", "food_water_size", self.food_water_size))
+        self.sliders.append(Slider(325, 490, 300, 0, 1, "purple", "Food-water chance", "food_water_chance", self.food_water_chance))
 
-        self.sliders.append(Slider(325, 475, 300, 0, 1, "green", "Mutation rate", "mutation_rate", self.mutation_rate))
+        self.sliders.append(Slider(325, 545, 300, 100, 25000, "violet", "Food max", "food_max", self.food_max))
+        self.sliders.append(Slider(325, 600, 300, 100, 25000, "violet", "Water max", "water_max", self.water_max))
 
-        #self.sliders.append(Slider(325, 475, 300, 200, 100000, "green", "Food max", "food_max", self.food_max))
-        #self.sliders.append(Slider(325, 550, 300, 200, 100000, "purple", "Water max", "water_max", self.water_max))
-        self.sliders.append(Slider(325, 550, 300, 0, 1, "red", "Food/water size", "food_water_size", self.food_water_size))
+        self.sliders.append(Slider(325, 655, 300, 0, 1, "blue", "Seasonal impact", "season_impact", self.season_impact))
+        self.sliders.append(Slider(325, 710, 300, 1, 50000, "orange", "Season length", "season_length", self.season_length))
+        self.sliders.append(Slider(325, 765, 300, 0, 20, "pink", "Source respawn rate", "source_respawn_rate", self.source_respawn_rate))
 
-        self.sliders.append(Slider(325, 625, 300, 0, 1, "purple", "Food/water chance", "food_water_chance", self.food_water_chance))
+        self.sliders.append(Slider(325, 820, 300, 500, 50000, "#CCCCCC", "World X size", "world_x_size", self.world_x_size))
+        self.sliders.append(Slider(325, 875, 300, 500, 50000, "#CCCCCC", "World Y size", "world_y_size", self.world_y_size))
 
-        self.sliders.append(Slider(325, 700, 300, 1000, 25000, "#AAAAAA", "World x size", "world_x_size", self.world_x_size))
-        self.sliders.append(Slider(325, 775, 300, 1000, 25000, "#AAAAAA", "World y size", "world_y_size", self.world_y_size))
-
-        self.sliders.append(Slider(1285, 325, 300, 0, 1, "blue", "Size", "size", self.size))
-        self.sliders.append(Slider(1285, 385, 300, 0, 1, "red", "Speed", "speed", self.speed))
-        self.sliders.append(Slider(1285, 445, 300, 0, 2*pi, "yellow", "Agility", "agility", self.agility))
-        self.sliders.append(Slider(1285, 505, 300, 0, 0.2, "#FFD900", "Wander agility", "wander_agility", self.wander_agility))
-        self.sliders.append(Slider(1285, 565, 300, 0, 1000, "green", "Vision range", "vision_range", self.vision_range))
-        self.sliders.append(Slider(1285, 635, 300, 0, 2*pi, "lightgreen", "Vision angle", "vision_angle", self.vision_angle))
-        self.sliders.append(Slider(1285, 695, 300, 0, 1, "indigo", "Fertility", "fertility", self.fertility))
-        self.sliders.append(Slider(1285, 755, 300, 0, 1, "#8C00FF", "Virility", "virility", self.virility))
-        self.sliders.append(Slider(1285, 815, 300, 0, 1, "#FF00AA", "Male chance", "male_chance", self.male_chance))
-        self.sliders.append(Slider(1285, 875, 300, 0, 1000, "#FFAE51", "Gestation", "gestation", self.gestation))
+        self.sliders.append(Slider(1285, 385, 300, 0, self.size_max, "blue", "Size", "size", self.size))
+        self.sliders.append(Slider(1285, 440, 300, 0, self.speed_max, "red", "Speed", "speed", self.speed))
+        self.sliders.append(Slider(1285, 495, 300, 0, self.agility_max, "yellow", "Agility", "agility", self.agility))
+        self.sliders.append(Slider(1285, 550, 300, 0, self.wander_agility_max, "#FFD900", "Wander agility", "wander_agility", self.wander_agility))
+        self.sliders.append(Slider(1285, 605, 300, 0, self.vision_range_max, "green", "Vision range", "vision_range", self.vision_range))
+        self.sliders.append(Slider(1285, 660, 300, 0, self.vision_angle_max, "lightgreen", "Vision angle", "vision_angle", self.vision_angle))
+        self.sliders.append(Slider(1285, 715, 300, 0, self.fertility_max, "indigo", "Fertility", "fertility", self.fertility))
+        self.sliders.append(Slider(1285, 770, 300, 0, self.virility_max, "#8C00FF", "Virility", "virility", self.virility))
+        self.sliders.append(Slider(1285, 825, 300, 0, self.male_chance_max, "#FF00AA", "Male chance", "male_chance", self.male_chance))
+        self.sliders.append(Slider(1285, 880, 300, 0, self.gestation_max, "#FFAE51", "Gestation", "gestation", self.gestation))
     
-    #def create_sim_sliders(self):
-        #self.sim_sliders.append(Slider(50, 50, 300, 100, 60000, "orange", "Simulation Speed (FPS)", "FPS", self.FPS))
-        #self.sim_sliders.append(Slider(50, 975, 300, 100, 2000, "cyan", "Graph Time Range", "graph_time", self.graph_time))
+    def create_sim_sliders(self):
+        self.sim_sliders.append(Slider(1650, 40, 250, 0, 1, "green", "Mutation rate %", "mutation_rate", self.mutation_rate))
+        self.sim_sliders.append(Slider(1650, 90, 250, 0, 2, "red", "Food/water size", "food_water_size", self.food_water_size))
+        self.sim_sliders.append(Slider(1650, 140, 250, 0, 1, "purple", "Food/water chance", "food_water_chance", self.food_water_chance))
+
+        self.sim_sliders.append(Slider(1650, 190, 250, 100, 25000, "violet", "Food max", "food_max", self.food_max))
+        self.sim_sliders.append(Slider(1650, 240, 250, 100, 25000, "violet", "Water max", "water_max", self.water_max))
+
+        self.sim_sliders.append(Slider(1650, 290, 250, 0, 1, "blue", "Seasonal impact", "season_impact", self.season_impact))
+        self.sim_sliders.append(Slider(1650, 340, 250, 1, 50000, "orange", "Season length", "season_length", self.season_length))
+        self.sim_sliders.append(Slider(1650, 390, 250, 0, 20, "pink", "Source respawn rate", "source_respawn_rate", self.source_respawn_rate))
+
+        self.sim_sliders.append(Slider(1650, 440, 250, 500, 50000, "#AAAAAA", "World X size", "world_x_size", self.world_x_size))
+        self.sim_sliders.append(Slider(1650, 490, 250, 500, 50000, "#AAAAAA", "World Y size", "world_y_size", self.world_y_size))
 
     def create_graph_sliders(self):
         self.graph_sliders.append(Slider(650, 1040, 500, 50, 0, "cyan", "Graph Time Range", "graph_time", 0))
+
+    def create_buttons(self):
+        def randomise_people(sim):
+            sim.randomise_people = not sim.randomise_people
+        
+        self.buttons.append(Button(1310, 300, 250, 40, "#00FF00", "#FF0000", "randomise_people", randomise_people))
+
+    def create_sim_buttons(self):
+        def to_graph(sim):
+            sim.draw = "graph"
+        
+        self.sim_buttons.append(Button(50, 300, 110, 60, "#8C00FF", "#8C00FF", "graph", to_graph))
+
+    def create_graph_buttons(self):
+        def to_sim(sim):
+            sim.draw = "sim"
+        
+        self.graph_buttons.append(Button(50, 300, 110, 60, "#FF00C8", "#FF00C8", "simulation", to_sim))
 
     def create_people(self):
         if self.randomise_people:
@@ -192,16 +293,16 @@ class Simulation:
                     alive = True,
                     sex = "male" if uniform(0,1) > 0.5 else "female",
                     genes = Genes(
-                        size =           uniform(0.1,1) ,
-                        speed =          uniform(0.1,1) ,
-                        agility =        uniform(0.1,1) * 2*pi,
-                        wander_agility = uniform(0,0.2) ,
-                        vision_range =   uniform(0.1,1) * 1000,
-                        vision_angle =   uniform(0.1,1) * 2*pi,
-                        fertility =      uniform(0.1,1) ,
-                        virility =       uniform(0.1,1) ,
-                        male_chance =    uniform(0.1,1) ,
-                        gestation =      uniform(0.1,1) * 1000
+                        size =           uniform(0,self.size_max),
+                        speed =          uniform(0,self.speed_max),
+                        agility =        uniform(0,self.agility_max),
+                        wander_agility = uniform(0,self.wander_agility_max),
+                        vision_range =   uniform(0,self.vision_range_max),
+                        vision_angle =   uniform(0,self.vision_angle_max),
+                        fertility =      uniform(0,self.fertility_max),
+                        virility =       uniform(0,self.virility_max),
+                        male_chance =    uniform(0,self.male_chance_max),
+                        gestation =      uniform(0,self.gestation_max)
                     ),
                     age = randint(0,100),
                     postnatal = None,
@@ -261,6 +362,19 @@ class Simulation:
                                    [],
                                    [],
                                    []))
+        
+        def metabolic_rate():
+            values = [person.metabolic_rate for person in self.people]
+            length = len(values)
+            average = sum(values)/length if length > 0 else 0
+            return average
+        
+        self.graphs.append(Graph("Metabolic rate",
+                                   metabolic_rate,
+                                   self.gene_dict["Metabolic rate"],
+                                   False,
+                                   []))
+        
         def people_length():
             return len(self.people)
         
@@ -291,16 +405,14 @@ class Simulation:
                                  False,
                                  []))
  
+    ################################################
+
     def normalise_coordinate(self, z, xory):
         if xory: return((z - self.camera_y) * self.zoom) + (self.screen_y / 2)
         else:    return((z - self.camera_x) * self.zoom) + (self.screen_x / 2)
     
     def update_simulation(self):
         self.day += 1
-        if 0 < self.day % 100000 < 25000: self.season = "Spring"
-        elif 25000 < self.day % 100000 < 50000: self.season = "Summer"
-        elif 50000 < self.day % 100000 < 75000: self.season = "Autumn"
-        else: self.season = "Winter"
 
         Source.respawn(self)   
 
@@ -332,8 +444,6 @@ class Simulation:
 
         if self.keys[pygame.K_w]:
             self.camera_y -= self.move_speed
-        if self.keys[pygame.K_w]:
-            self.camera_y -= self.move_speed
         if self.keys[pygame.K_s]:
             self.camera_y += self.move_speed
         if self.keys[pygame.K_a]:
@@ -349,7 +459,7 @@ class Simulation:
             self.camera_x = self.world_x_size/2
             self.camera_y = self.world_y_size/2
         
-        self.zoom = max(0.05, min(100, self.zoom))
+        self.zoom = max(0.01, min(500, self.zoom))
     
     def update_grid(self, objects):
         for grid_object in objects:
@@ -413,6 +523,19 @@ class Simulation:
         elif place == "left": rect = text.get_rect(midleft = (x,y))
         self.screen.blit(text, rect)
 
+    def draw_interactables(self, sliders, buttons):
+        mouse_x = pygame.mouse.get_pos()[0]
+        mouse_y = pygame.mouse.get_pos()[1]
+
+        for slider in sliders:
+            slider.draw_text(self)
+            slider.draw(self)
+            slider.pulled(self, mouse_x, mouse_y)
+
+        for button in buttons:
+            button.draw(self)
+            button.pressed(self, mouse_x, mouse_y)
+            
     def draw_box(self, x, y, x_size, y_size, colour, alpha = 255, border_size = 0):
         rect = pygame.Rect(x, y, x_size, y_size)
         surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
@@ -428,13 +551,7 @@ class Simulation:
         self.draw_text(self.screen_x/4, 250, "Simulation", (255,255,255), size = 42)
         self.draw_text(3*self.screen_x/4, 250, "Creature Simulation", (255,255,255), size = 42)
 
-        mouse_x = pygame.mouse.get_pos()[0]
-        mouse_y = pygame.mouse.get_pos()[1]
-
-        for slider in self.sliders:
-            slider.draw_text(self)
-            slider.draw(self)
-            slider.pulled(self, mouse_x, mouse_y)
+        self.draw_interactables(self.sliders, self.buttons)
 
     def draw_simulation(self):
         self.screen.fill("#131729")
@@ -444,7 +561,7 @@ class Simulation:
 
         for source in self.sources:
             source.draw(self)
-
+        
         border_rect = pygame.Rect(((-self.camera_x * self.zoom) + self.screen_x/2),((-self.camera_y * self.zoom) + self.screen_y/2),round(self.world_x_size*self.zoom),round(self.world_y_size*self.zoom))
         pygame.draw.rect(self.screen, (255,255,255), border_rect, max(1,round(5*self.zoom)))
 
@@ -471,7 +588,7 @@ class Simulation:
                         self.selected_person = person
 
         if self.selected_person: 
-            person_size = self.selected_person.genes.size*4
+            person_size = self.selected_person.genes.size*2
             person_x = self.normalise_coordinate(self.selected_person.x, 0)
             person_y = self.normalise_coordinate(self.selected_person.y, 1)
             pygame.draw.circle(self.screen, "gold", (person_x, person_y), max(1,person_size*self.zoom))
@@ -483,22 +600,15 @@ class Simulation:
                 person_y = self.normalise_coordinate(self.selected_person.target.y, 1)
                 pygame.draw.circle(self.screen, "orange", (person_x, person_y), max(1,person_size*self.zoom))
         
-        chance = 1/2 * sin((1/25000) * self.day) + 1
-        self.draw_text(200, 200, "Respawn Chance: " + str(round(chance,2)) + "%", "#FFFFFF")
+        chance = (self.season_impact) * sin((1/self.season_length) * self.day) + 1
 
-        self.draw_text(50, 220, f"Season {self.season}", (255,255,255), "left")
         self.draw_text(50, 60, f"Speed {round(self.FPS/60)}", place = "left")
-        self.draw_text(50, 100, f"Zoom {round(self.zoom)}", place = "left")
-        self.draw_text(50, 140, f"Population {len(self.people)}", place = "left")
-        self.draw_text(50, 180, f"Sources Amount {len(self.sources)}", place = "left")
+        self.draw_text(50, 90, f"Zoom {round(self.zoom)}", place = "left")
+        self.draw_text(50, 120, f"Population {len(self.people)}", place = "left")
+        self.draw_text(50, 150, f"Sources Amount {len(self.sources)}", place = "left")
+        self.draw_text(50, 180, f"Seasonal food effect: {str(round(chance,2))} %", place = "left")
 
-        mouse_x = pygame.mouse.get_pos()[0]
-        mouse_y = pygame.mouse.get_pos()[1]
-
-        for slider in self.sim_sliders:
-            slider.draw_text(self)
-            slider.draw(self)
-            slider.pulled(self, mouse_x, mouse_y)
+        self.draw_interactables(self.sim_sliders, self.sim_buttons)
 
     def draw_hover_ui(self, person):
         person.draw_vision_radius(self)
@@ -558,7 +668,7 @@ class Simulation:
 
         #draw static variables
         self.draw_text(left+20, 610, f"Sex: {person.sex}", place = "left")
-        self.draw_text(left+20, 640, f"Metabolic rate: {person.metabolic_rate*50000}", place = "left")
+        self.draw_text(left+20, 640, f"Metabolic rate: {person.metabolic_rate}", place = "left")
 
         #draw genes
         count = 0
@@ -583,19 +693,11 @@ class Simulation:
                         self.selected_graph -= 1
                     else:
                         self.selected_graph = len(self.graphs)-1
-                if event.key == pygame.K_UP:
-                    self.graph_time *= 2
-                if event.key == pygame.K_DOWN:
-                    self.graph_time /= 2
-                    self.graph_time = max(self.graph_time, 100)
 
     def draw_graphs(self):
         self.screen.fill("#131729")
         self.draw_grid()
         self.graphs[self.selected_graph].draw(self)
-
-        mouse_x = pygame.mouse.get_pos()[0]
-        mouse_y = pygame.mouse.get_pos()[1]
 
         if self.graph_sliders[0].current_value == self.graph_sliders[0].max:
             self.graph_sliders[0].max = (self.day-50000)/100
@@ -604,10 +706,7 @@ class Simulation:
         else:
             self.graph_sliders[0].max = (self.day-50000)/100
 
-        for slider in self.graph_sliders:
-            slider.draw_text(self)
-            slider.draw(self)
-            slider.pulled(self, mouse_x, mouse_y)
+        self.draw_interactables(self.graph_sliders, self.graph_buttons)
 
     def draw_grid(self):
         for i in range(round(self.graph_x_size/self.graph_grid_size)+1):

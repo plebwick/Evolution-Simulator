@@ -62,26 +62,22 @@ class Person:
         self.activity = activity
         self.colour = colour
 
-        self.size           = self.genes.size
-        self.speed          = self.genes.speed
-        self.agility        = self.genes.agility        / 2*pi
+        self.size           = self.genes.size ** 3
+        self.speed          = self.genes.speed ** 2
+        self.agility        = self.genes.agility        / (1/(2*pi))
         self.wander_agility = self.genes.wander_agility
-        self.vision_range   = self.genes.vision_range   / 1000
-        self.vision_angle   = self.genes.vision_angle   / 2*pi
+        self.vision_range   = self.genes.vision_range   / 100
+        self.vision_angle   = self.genes.vision_angle   / (1/(2*pi))
         self.fertility      = self.genes.fertility
         self.virility       = self.genes.virility
         self.male_chance    = self.genes.male_chance
-        self.gestation_     = self.genes.gestation      / 1000
+        self.gestation_     = self.genes.gestation      
 
         number = 5
-        size_factor = self.size/number
-        agility_factor = self.agility*2/number
-        speed_factor = self.speed/number
-        vision_range_factor = self.vision_range/number
-        vision_angle_factor = self.vision_angle/number
 
-        scale = 100000
-        self.metabolic_rate = 1/(scale*2) + (size_factor + speed_factor + vision_range_factor + vision_angle_factor + agility_factor)/(number*(scale/1))#((size/5)**2 * (speed/5)**2 * 0.1) / 432 / 5
+
+        scale = 500000
+        self.metabolic_rate =  (self.size + self.speed + self.vision_range + self.vision_angle + self.agility)/(scale)
         self.stomach_size = self.size*2
         self.bladder_size = self.size*2
 
@@ -132,8 +128,8 @@ class Person:
         self.hydrated -= (self.metabolic_rate*3)
 
         if self.gestation:
-            self.satiety -= self.metabolic_rate * 0.25
-            self.hydrated -= self.metabolic_rate * 0.25
+            self.satiety -= self.metabolic_rate * 0.15
+            self.hydrated -= self.metabolic_rate * 0.15
         
         if self.satiety < 0 or self.hydrated < 0: 
             self.alive = False
@@ -231,10 +227,8 @@ class Person:
                     self.hydrated += sim.food_water_size
                     self.hydrated = min(self.hydrated, self.bladder_size)
             elif self.activity == "mate":
-                #self.satiety -= self.stomach_size*0.1
-                #self.hydrated -= self.bladder_size*0.1
-                #self.satiety -= self.metabolic_rate*1000
-                #self.hydrated -= self.metabolic_rate*1000
+                self.satiety -= self.stomach_size * 0.15
+                self.hydrated -= self.bladder_size * 0.15
                 if self.sex == "female":
                     self.gestational = 1
             self.target = None
@@ -260,7 +254,7 @@ class Person:
         new_agility = self.mutate(sim, self.genes.agility, self.mate.genes.agility)
         new_wander_agility = self.mutate(sim, self.genes.wander_agility, self.mate.genes.wander_agility)
         new_vision_range = self.mutate(sim, self.genes.vision_range, self.mate.genes.vision_range)
-        new_vision_angle = self.mutate(sim, self.genes.vision_angle, self.mate.genes.vision_angle)
+        new_vision_angle = min(self.mutate(sim, self.genes.vision_angle, self.mate.genes.vision_angle), 2*pi)
         new_fertility = self.mutate(sim, self.genes.fertility, self.mate.genes.fertility)
         new_virility = self.mutate(sim, self.genes.virility, self.mate.genes.virility)
         new_male_chance = self.mutate(sim, self.genes.male_chance, self.mate.genes.male_chance)
@@ -279,8 +273,8 @@ class Person:
         #new_gestation = self.genes.gestation + uniform(-self.genes.gestation*self.mutation_rate,self.genes.gestation*self.mutation_rate)
 
         #male_chance = (self.genes.male_chance + self.mate.genes.male_chance)/2
-        satiety = self.satiety*0.20
-        hydration = self.hydrated*0.20
+        satiety = self.satiety*0.15
+        hydration = self.hydrated*0.15
 
         sim.people.append(Person(x = self.x,
                  y = self.y,
